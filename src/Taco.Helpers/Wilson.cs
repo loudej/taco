@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting;
 using System.Threading;
 using Taco;
 using Taco.Helpers;
@@ -58,7 +59,7 @@ namespace Taco.Helpers {
                             href = "?flip=right";
                         }
 
-                        response.Finish((fault2, complete) => DoSlowly(350, fault2,
+                        response.Finish((fault2, complete) => TimerLoop(350, fault2,
                             () => response.Write("<title>Hutchtastic</title>"),
                             () => response.Write("<pre>"),
                             () => response.Write(wilson),
@@ -75,7 +76,7 @@ namespace Taco.Helpers {
             };
         }
 
-        private static void DoSlowly(double interval, Action<Exception> fault2, params Action[] steps) {
+        private static void TimerLoop(double interval, Action<Exception> fault, params Action[] steps) {
             var iter = steps.AsEnumerable().GetEnumerator();
             var timer = new System.Timers.Timer(interval);
             timer.Elapsed += (sender, e) => {
@@ -85,7 +86,7 @@ namespace Taco.Helpers {
                     }
                     catch (Exception ex) {
                         timer.Stop();
-                        fault2(ex);
+                        fault(ex);
                     }
                 }
                 else {
