@@ -12,13 +12,13 @@ using Taco.Helpers.Utils;
 [assembly: Builder("ShowExceptions", typeof(ShowExceptions), "Call")]
 
 namespace Taco.Helpers {
-    using FnApp = Action<
+    using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
         Action<int, IDictionary<string, string>, IObservable<object>>>;
 
     public class ShowExceptions {
-        public static FnApp Call(FnApp app) {
+        public static AppAction Call(AppAction app) {
             return (env, fault, result) => {
                 Action<Exception, Action<object>> writeErrorPageBody = (ex, write) => {
                     write("<h1>Server Error</h1>");
@@ -28,9 +28,9 @@ namespace Taco.Helpers {
                 };
 
                 Action<Exception> sendErrorPageResponse = ex => {
-                    var response = new Response(result) {Status = 500};
-                    response.SetHeader("Content-Type", "text/html");
-                    response.Finish(() => writeErrorPageBody(ex, response.Write));
+                    var response = new Response(result) { Status = 500, ContentType = "text/html" };
+                    writeErrorPageBody(ex, response.Write);
+                    response.Finish();
                 };
 
                 try {
