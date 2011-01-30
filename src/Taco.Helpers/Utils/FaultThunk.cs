@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
 
-namespace Taco.Helpers {
+namespace Taco.Helpers.Utils {
     class FaultThunk : MarshalByRefObject, ILogicalThreadAffinative {
         private readonly Action<Exception> _fault;
 

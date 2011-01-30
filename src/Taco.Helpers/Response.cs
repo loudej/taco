@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Taco.Helpers.Utils;
 
 namespace Taco.Helpers {
     public class Response {

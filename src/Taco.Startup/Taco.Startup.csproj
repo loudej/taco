@@ -43,6 +43,7 @@
     <Compile Include="Builder.cs" />
     <Compile Include="Coerce.cs" />
     <Compile Include="DefaultAssemblyLoader.cs" />
+    <Compile Include="Environment.cs" />
     <Compile Include="IAssemblyLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

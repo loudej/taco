@@ -40,8 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Disposable.cs" />
-    <Compile Include="FaultThunk.cs" />
+    <Compile Include="Utils\Disposable.cs" />
+    <Compile Include="Utils\FaultThunk.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Utils\ParamDictionary.cs" />
     <Compile Include="Request.cs" />

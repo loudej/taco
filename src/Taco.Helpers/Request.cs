@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Taco.Helpers.Utils;
 
 namespace Taco.Helpers {
+    using LoggerAction = Action<TraceEventType /*traceEventType*/, Func<string> /*message*/, Exception /*exception*/>;
+
     public class Request {
         readonly IDictionary<string, object> _env;
 
@@ -27,9 +30,9 @@ namespace Taco.Helpers {
         public string QueryString { get { return Get<string>("QUERY_STRING"); } }
         public string ContentLength { get { return Get<string>("CONTENT_LENGTH"); } }
         public string ContentType { get { return Get<string>("CONTENT_TYPE"); } }
-        //public ISession Session { get { return Get<ISession>("rack.session"); } }
-        //public string SessionOptions{get { return Get<string>("rack.session.options"); }}
-        public Logger Logger { get { return Logger.For(Get<Log>("taco.logger")); } }
+
+        public IDictionary<string, object> Session { get { return Get<IDictionary<string, object>>("taco.session"); } }
+        public Logger Logger { get { return Logger.For(Get<LoggerAction>("taco.logger")); } }
 
         public IDictionary<string, string> GET {
             get {

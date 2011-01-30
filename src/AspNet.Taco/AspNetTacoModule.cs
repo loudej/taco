@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using FluentAsync;
 using Taco.Startup;
+using Environment = Taco.Startup.Environment;
 
 namespace AspNet.Taco {
 
@@ -24,25 +25,37 @@ namespace AspNet.Taco {
                 (sender, e, callback, state) => {
                     var httpApplication = (HttpApplication)sender;
                     var httpContext = httpApplication.Context;
-                    httpContext.Response.Buffer = false;
+                    var httpRequest = httpContext.Request;
+                    var httpResponse = httpContext.Response;
+                    var serverVariables = httpRequest.ServerVariables;
 
-                    var env = new Dictionary<string, object>();
-                    foreach (string key in httpContext.Request.ServerVariables) {
-                        env[key] = httpContext.Request.ServerVariables[key];
-                    }
+                    httpResponse.Buffer = false;
 
-                    env["taco.input"] = new BodyReader(httpContext.Request.InputStream);
+                    var env = serverVariables.AllKeys
+                        .ToDictionary(key => key, key => (object)serverVariables[key]);
+
+                    new Environment(env) {
+                        Version = new Version(1, 0),
+                        UrlScheme = httpRequest.Url.Scheme,
+                        Body = new BodyReader(httpRequest.InputStream),
+                        Errors = Console.OpenStandardError(),
+                        Multithread = true,
+                        Multiprocess = false,
+                        RunOnce = false,
+                        Session = new DefaultSession(httpContext.Session),
+                        Logger = (eventType, message, exception) => { },
+                    };
 
 
                     var task = Task.Factory.StartNew(_ => {
                         app.InvokeAsync(env)
                             .Then((status, headers, body) => {
-                                httpContext.Response.StatusCode = status;
+                                httpResponse.StatusCode = status;
                                 foreach (var header in Split(headers)) {
-                                    httpContext.Response.AppendHeader(header.Key, header.Value);
+                                    httpResponse.AppendHeader(header.Key, header.Value);
                                 }
-                                var writer = new BodyWriter(context.Response.OutputStream.Write, context.Response.ContentEncoding);
-                                body.ForEach(writer.Write).Then(context.Response.End);
+                                var writer = new BodyWriter(httpResponse.OutputStream.Write, httpResponse.ContentEncoding);
+                                body.ForEach(writer.Write).Then(httpResponse.End);
                             });
                     }, state, TaskCreationOptions.PreferFairness);
 

@@ -6,6 +6,7 @@ namespace Taco.Helpers.Utils
 {
     class ParamDictionary : IDictionary<string, string> {
         public static IDictionary<string, string> Parse(string queryString) {
+            // TODO: this is wrong in many, many ways
             var d = queryString.Split("&".ToCharArray())
                 .Select(item => item.Split("=".ToCharArray(), 2))
                 .Where(item => item.Length == 2)

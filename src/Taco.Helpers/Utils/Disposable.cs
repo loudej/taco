@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Taco.Helpers {
+namespace Taco.Helpers.Utils {
     class Disposable : IDisposable {
         private readonly Action _dispose;
         public Disposable() : this(() => { }) { }
