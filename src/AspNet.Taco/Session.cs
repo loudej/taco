@@ -6,10 +6,10 @@ using System.Web.SessionState;
 
 namespace AspNet.Taco
 {
-    class DefaultSession : IDictionary<string, object> {
+    class Session : IDictionary<string, object> {
         private readonly HttpSessionState _session;
 
-        public DefaultSession(HttpSessionState session) {
+        public Session(HttpSessionState session) {
             _session = session;
         }
 

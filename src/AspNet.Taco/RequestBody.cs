@@ -2,23 +2,23 @@
 using System.IO;
 
 namespace AspNet.Taco {
-    class BodyReader : IObservable<object> {
+    class RequestBody : IObservable<object> {
         private readonly Stream _stream;
 
-        public BodyReader(Stream stream) {
+        public RequestBody(Stream stream) {
             _stream = stream;
         }
 
         class Loop : IDisposable {
+            public Action Go;
             public bool Stop;
             public readonly byte[] Buffer = new byte[4096];
-            public Action Next;
             public void Dispose() { Stop = true; }
         };
 
         public IDisposable Subscribe(IObserver<object> observer) {
             var loop = new Loop();
-            loop.Next = () => {
+            loop.Go = () => {
                 try {
                     _stream.BeginRead(loop.Buffer, 0, loop.Buffer.Length, ar => {
                         try {
@@ -31,7 +31,7 @@ namespace AspNet.Taco {
                             }
                             else {
                                 observer.OnNext(new ArraySegment<byte>(loop.Buffer, 0, count));
-                                loop.Next();
+                                loop.Go();
                             }
                         }
                         catch (Exception ex) {
@@ -44,7 +44,7 @@ namespace AspNet.Taco {
                 }
             };
 
-            loop.Next();
+            loop.Go();
             return loop;
         }
     }

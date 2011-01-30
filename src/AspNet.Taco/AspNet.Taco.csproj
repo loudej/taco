@@ -42,10 +42,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AspNetTacoModule.cs" />
-    <Compile Include="BodyReader.cs" />
-    <Compile Include="BodyWriter.cs" />
+    <Compile Include="RequestBody.cs" />
+    <Compile Include="ResponseBody.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DefaultSession.cs" />
+    <Compile Include="Session.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FluentAsync\FluentAsync.csproj">

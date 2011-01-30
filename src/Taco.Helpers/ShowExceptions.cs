@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Taco;
 using Taco.Helpers;
+using Taco.Helpers.Utils;
 
 [assembly: Builder("ShowExceptions", typeof(ShowExceptions), "Call")]
 
@@ -14,20 +15,32 @@ namespace Taco.Helpers {
     public class ShowExceptions {
         public static FnApp Call(FnApp app) {
             return (env, fault, result) => {
-                Action<Exception> errorPage = ex => {
+
+                Action<Exception, Action<object>> writeErrorPageBody = (ex, write) => {
+                    write("<h1>Server Error</h1>");
+                    write("<p>");
+                    write(ex.Message); //TODO: htmlencode, etc
+                    write("</p>");
+                };
+
+                Action<Exception> sendErrorPageResponse = ex => {
                     var response = new Response(result) { Status = 500 };
                     response.SetHeader("Content-Type", "text/html");
-                    response.Finish(() => response.Write("<h1>Server Error</h1>"));
+                    response.Finish(() => writeErrorPageBody(ex, response.Write));
                 };
 
                 try {
-                    app(env, errorPage, (status, headers, body) => {
-                        // todo: shim body to show exceptions while streaming
-                        result(status, headers, body);
-                    });
+                    // intercept app-fault with sendErrorPageResponse, which is the full error page response
+                    // intercept body-error with writeErrorPageBody, which adds the error text to the output and completes the response
+                    app(env, sendErrorPageResponse, (status, headers, body) =>
+                        result(status, headers, body.Filter((subscribe, next, error, complete) =>
+                            subscribe(next, ex => {
+                                writeErrorPageBody(ex, next);
+                                complete();
+                            }, complete))));
                 }
                 catch (Exception ex) {
-                    errorPage(ex);
+                    sendErrorPageResponse(ex);
                 }
             };
         }

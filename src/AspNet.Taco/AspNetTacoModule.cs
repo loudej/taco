@@ -37,13 +37,13 @@ namespace AspNet.Taco {
                     new Environment(env) {
                         Version = new Version(1, 0),
                         UrlScheme = httpRequest.Url.Scheme,
-                        Body = new BodyReader(httpRequest.InputStream),
+                        Body = new RequestBody(httpRequest.InputStream),
                         Errors = Console.OpenStandardError(),
                         Multithread = true,
                         Multiprocess = false,
                         RunOnce = false,
-                        Session = new DefaultSession(httpContext.Session),
-                        Logger = (eventType, message, exception) => { },
+                        Session = new Session(httpContext.Session),
+                        Logger = (eventType, message, exception) => { }, //TODO: any default logger for this host?
                     };
 
 
@@ -54,10 +54,11 @@ namespace AspNet.Taco {
                                 foreach (var header in Split(headers)) {
                                     httpResponse.AppendHeader(header.Key, header.Value);
                                 }
-                                var writer = new BodyWriter(httpResponse.OutputStream.Write, httpResponse.ContentEncoding);
+                                var writer = new ResponseBody(httpResponse.OutputStream.Write, httpResponse.ContentEncoding);
                                 body.ForEach(writer.Write).Then(httpResponse.End);
                             });
                     }, state, TaskCreationOptions.PreferFairness);
+
 
                     if (callback != null)
                         task.Finally(() => callback(task));

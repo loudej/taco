@@ -3,11 +3,11 @@ using System.Text;
 
 namespace AspNet.Taco
 {
-    public class BodyWriter {
+    public class ResponseBody {
         private readonly Action<byte[], int, int> _write;
         private readonly Encoding _encoding;
 
-        public BodyWriter(Action<byte[], int, int> write, Encoding encoding) {
+        public ResponseBody(Action<byte[], int, int> write, Encoding encoding) {
             _write = write;
             _encoding = encoding;
         }
