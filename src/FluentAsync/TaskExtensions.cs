@@ -17,48 +17,48 @@ namespace FluentAsync {
 
         public static Task<TResult> Then<T, TResult>(this Task<T> task, Func<T, TResult> continuation) {
             return task.ContinueWith(t => continuation(t.Result),
-                                     TaskContinuationOptions.AttachedToParent |
-                                     TaskContinuationOptions.OnlyOnRanToCompletion |
-                                     TaskContinuationOptions.ExecuteSynchronously);
+                TaskContinuationOptions.AttachedToParent |
+                    TaskContinuationOptions.OnlyOnRanToCompletion |
+                        TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public static Task Then(this Task task, Action continuation) {
             return task.ContinueWith(t => continuation(),
-                                     TaskContinuationOptions.AttachedToParent |
-                                     TaskContinuationOptions.OnlyOnRanToCompletion |
-                                     TaskContinuationOptions.ExecuteSynchronously);
+                TaskContinuationOptions.AttachedToParent |
+                    TaskContinuationOptions.OnlyOnRanToCompletion |
+                        TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public static Task Then<T>(this Task<T> task, Action<T> continuation) {
             return task.ContinueWith(t => continuation(t.Result),
-                                     TaskContinuationOptions.AttachedToParent |
-                                     TaskContinuationOptions.OnlyOnRanToCompletion |
-                                     TaskContinuationOptions.ExecuteSynchronously);
+                TaskContinuationOptions.AttachedToParent |
+                    TaskContinuationOptions.OnlyOnRanToCompletion |
+                        TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public static Task Then<T1, T2, T3>(this Task<Tuple<T1, T2, T3>> task, Action<T1, T2, T3> continuation) {
             return task.ContinueWith(t => continuation(t.Result.Item1, t.Result.Item2, t.Result.Item3),
-                                     TaskContinuationOptions.AttachedToParent |
-                                     TaskContinuationOptions.OnlyOnRanToCompletion |
-                                     TaskContinuationOptions.ExecuteSynchronously);
+                TaskContinuationOptions.AttachedToParent |
+                    TaskContinuationOptions.OnlyOnRanToCompletion |
+                        TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public static Task<T> Catch<T>(this Task<T> task, Func<Exception, T> handler) {
             return task.ContinueWith(t => t.IsFaulted ? handler(t.Exception) : t.Result,
-                                     TaskContinuationOptions.AttachedToParent |
-                                     TaskContinuationOptions.ExecuteSynchronously);
+                TaskContinuationOptions.AttachedToParent |
+                    TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public static Task Catch(this Task task, Action<Exception> handler) {
             return task.ContinueWith(t => { if (t.IsFaulted) handler(t.Exception); },
-                                     TaskContinuationOptions.AttachedToParent |
-                                     TaskContinuationOptions.ExecuteSynchronously);
+                TaskContinuationOptions.AttachedToParent |
+                    TaskContinuationOptions.ExecuteSynchronously);
         }
 
         public static Task Finally(this Task task, Action continuation) {
             return task.ContinueWith(t => continuation(),
-                                     TaskContinuationOptions.AttachedToParent |
-                                     TaskContinuationOptions.ExecuteSynchronously);
+                TaskContinuationOptions.AttachedToParent |
+                    TaskContinuationOptions.ExecuteSynchronously);
         }
     }
 }

@@ -4,11 +4,11 @@ using Taco.Helpers.Utils;
 
 namespace Taco.Helpers {
     public class Response {
-        private readonly Action<int, IDictionary<string, string>, IObservable<object>> _result;
+        readonly Action<int, IDictionary<string, string>, IObservable<object>> _result;
 
-        private int _status = 200;
-        private readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
-        private readonly Body _body = new Body();
+        int _status = 200;
+        readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
+        readonly Body _body = new Body();
 
         public Response(Action<int, IDictionary<string, string>, IObservable<object>> result) {
             _result = result;
@@ -39,15 +39,25 @@ namespace Taco.Helpers {
 
 
         public void Finish() {
-            _result(Status, _headers, _body.Attach((fault, complete) => { complete(); return () => { }; }));
+            _result(Status, _headers, _body.Attach((fault, complete) => {
+                complete();
+                return () => { };
+            }));
         }
 
         public void Finish(Action<Action<Exception>, Action> block) {
-            _result(Status, _headers, _body.Attach((fault, complete) => { block(fault, complete); return () => { }; }));
+            _result(Status, _headers, _body.Attach((fault, complete) => {
+                block(fault, complete);
+                return () => { };
+            }));
         }
 
         public void Finish(Action block) {
-            _result(Status, _headers, _body.Attach((fault, complete) => { block(); complete(); return () => { }; }));
+            _result(Status, _headers, _body.Attach((fault, complete) => {
+                block();
+                complete();
+                return () => { };
+            }));
         }
 
         public void Finish(Func<Action<Exception>, Action, Action> block) {
@@ -55,8 +65,8 @@ namespace Taco.Helpers {
         }
 
         class Body : IObservable<object> {
-            private readonly IList<object> _body = new List<object>();
-            private Func<Action<Exception>, Action, Action> _block;
+            readonly IList<object> _body = new List<object>();
+            Func<Action<Exception>, Action, Action> _block;
 
             public Body() {
                 Write = _body.Add;
@@ -85,4 +95,3 @@ namespace Taco.Helpers {
         }
     }
 }
-

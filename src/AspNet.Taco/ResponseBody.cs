@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Text;
 
-namespace AspNet.Taco
-{
+namespace AspNet.Taco {
     public class ResponseBody {
-        private readonly Action<byte[], int, int> _write;
-        private readonly Encoding _encoding;
+        readonly Action<byte[], int, int> _write;
+        readonly Encoding _encoding;
 
         public ResponseBody(Action<byte[], int, int> write, Encoding encoding) {
             _write = write;

@@ -4,17 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.SessionState;
 
-namespace AspNet.Taco
-{
+namespace AspNet.Taco {
     class Session : IDictionary<string, object> {
-        private readonly HttpSessionState _session;
+        readonly HttpSessionState _session;
 
         public Session(HttpSessionState session) {
             _session = session;
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator() {
-            return _session.Keys.OfType<string>().Select(key => new KeyValuePair<string, object>(key, _session[(string) key])).GetEnumerator();
+            return _session.Keys.OfType<string>().Select(key => new KeyValuePair<string, object>(key, _session[key])).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {

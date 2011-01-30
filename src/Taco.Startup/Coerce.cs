@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Taco.Startup {
-
     public static class Coerce {
         public static object CoerceDelegate(Type neededDelegateType, object existingDelegate) {
             // simplest case - same delegate type
@@ -18,7 +17,7 @@ namespace Taco.Startup {
             var parameters = neededParameters.Zip(existingParameters, (neededParameterInfo, existingParameterInfo) => {
                 var neededParameter = Expression.Parameter(neededParameterInfo.ParameterType, neededParameterInfo.Name);
                 var existingArgument = CoerceExpression(existingParameterInfo.ParameterType, neededParameter);
-                return new { neededParameter, existingArgument, neededParameterInfo, existingParameterInfo };
+                return new {neededParameter, existingArgument, neededParameterInfo, existingParameterInfo};
             }).ToArray();
 
             // next simplest case - delegates with the same arguments types
@@ -66,10 +65,10 @@ namespace Taco.Startup {
 
             return Expression.Convert(
                 Expression.Call(null,
-                                createDelegate,
-                                Expression.Constant(newDelegateType, typeof(Type)),
-                                existingDelegate,
-                                Expression.Constant(existingDelegateInvoke, typeof(MethodInfo))),
+                    createDelegate,
+                    Expression.Constant(newDelegateType, typeof(Type)),
+                    existingDelegate,
+                    Expression.Constant(existingDelegateInvoke, typeof(MethodInfo))),
                 newDelegateType);
         }
 
@@ -80,6 +79,5 @@ namespace Taco.Startup {
         static MethodInfo Methodof<T1, T2, T3, T>(Expression<Func<T1, T2, T3, T>> expr) {
             return ((MethodCallExpression)expr.Body).Method;
         }
-
     }
 }

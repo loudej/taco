@@ -7,24 +7,22 @@ namespace Taco.Startup {
     using FnApp = Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>;
 
     public class Builder {
-        private readonly IAssemblyLoader _loader;
+        readonly IAssemblyLoader _loader;
         readonly Stack<Func<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>, Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>>> _middlewares = new Stack<Func<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>, Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>>>();
         readonly List<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>> _apps = new List<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>>();
 
-        private static readonly char[] EndOfLineCharacters = new[] { '\r', '\n' };
-        private readonly IDictionary<string, Action<string>> _directives;
+        static readonly char[] EndOfLineCharacters = new[] {'\r', '\n'};
+        readonly IDictionary<string, Action<string>> _directives;
 
-        private readonly IDictionary<string, IList<MethodInfo>> _componentFactories = new Dictionary<string, IList<MethodInfo>>();
+        readonly IDictionary<string, IList<MethodInfo>> _componentFactories = new Dictionary<string, IList<MethodInfo>>();
 
 
         public Builder()
-            : this(new DefaultAssemblyLoader()) {
-        }
+            : this(new DefaultAssemblyLoader()) {}
 
         public Builder(IAssemblyLoader loader) {
             _loader = loader;
-            _directives = new Dictionary<string, Action<string>>
-            {
+            _directives = new Dictionary<string, Action<string>> {
                 {"Load ", DoLoad},
                 {"Run ", DoRun},
                 {"Use ", DoUse},
@@ -54,7 +52,7 @@ namespace Taco.Startup {
             ParseLines(SplitLines(text));
         }
 
-        private static IEnumerable<string> SplitLines(string text) {
+        static IEnumerable<string> SplitLines(string text) {
             var scanIndex = 0;
             while (scanIndex < text.Length) {
                 var endOfLineIndex = text.IndexOfAny(EndOfLineCharacters, scanIndex);
@@ -85,7 +83,7 @@ namespace Taco.Startup {
             }
         }
 
-        private void DoLoad(string text) {
+        void DoLoad(string text) {
             var factoryAttributes = _loader.Load(text);
             foreach (var factoryAttribute in factoryAttributes) {
                 var methods = factoryAttribute.Type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
@@ -102,7 +100,7 @@ namespace Taco.Startup {
             }
         }
 
-        private void DoRun(string text) {
+        void DoRun(string text) {
             IList<MethodInfo> factories;
             if (!_componentFactories.TryGetValue(text, out factories)) {
                 throw new ApplicationException("No factory methods registered for component: " + text);
@@ -122,7 +120,7 @@ namespace Taco.Startup {
             Run(app2);
         }
 
-        private void DoUse(string text) {
+        void DoUse(string text) {
             IList<MethodInfo> factories;
             if (!_componentFactories.TryGetValue(text, out factories)) {
                 throw new ApplicationException("No factory methods registered for component: " + text);
@@ -131,7 +129,7 @@ namespace Taco.Startup {
             Use(app => {
                 var methodInfo = factories.Single();
                 var neededDelegateType = methodInfo.GetParameters().Single().ParameterType;
-                var middleware = methodInfo.Invoke(null, new[] { Coerce.CoerceDelegate(neededDelegateType, app) });
+                var middleware = methodInfo.Invoke(null, new[] {Coerce.CoerceDelegate(neededDelegateType, app)});
                 return Coerce.CoerceDelegate<FnApp>(middleware);
             });
         }

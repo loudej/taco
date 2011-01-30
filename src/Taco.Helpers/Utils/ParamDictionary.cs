@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Taco.Helpers.Utils
-{
+namespace Taco.Helpers.Utils {
     class ParamDictionary : IDictionary<string, string> {
         public static IDictionary<string, string> Parse(string queryString) {
             // TODO: this is wrong in many, many ways
@@ -16,7 +15,7 @@ namespace Taco.Helpers.Utils
             return new ParamDictionary(d);
         }
 
-        private readonly IDictionary<string, string> _impl;
+        readonly IDictionary<string, string> _impl;
 
         public ParamDictionary(IDictionary<string, string> impl) {
             _impl = impl;

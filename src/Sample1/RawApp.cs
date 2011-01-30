@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using FluentAsync;
+using Sample1;
 using Taco;
 using Taco.Helpers;
 
-[assembly: Builder("RawApp", typeof(Sample1.RawApp), "Create")]
+[assembly: Builder("RawApp", typeof(RawApp), "Create")]
 
 namespace Sample1 {
     using FnApp = Action<
@@ -21,9 +22,7 @@ namespace Sample1 {
                     var data = (ArraySegment<byte>)next;
                     stream.Write(data.Array, data.Offset, data.Count);
                     return stream;
-                }).Then(stream => {
-                    result(404, new Dictionary<string, string> { { "Content-Type", "text/html" } }, null);
-                });
+                }).Then(stream => { result(404, new Dictionary<string, string> {{"Content-Type", "text/html"}}, null); });
             };
         }
     }

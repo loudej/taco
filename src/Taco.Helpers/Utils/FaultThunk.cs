@@ -5,9 +5,9 @@ using System.Runtime.Serialization;
 
 namespace Taco.Helpers.Utils {
     class FaultThunk : MarshalByRefObject, ILogicalThreadAffinative {
-        private readonly Action<Exception> _fault;
+        readonly Action<Exception> _fault;
 
-        private FaultThunk(Action<Exception> fault) {
+        FaultThunk(Action<Exception> fault) {
             _fault = fault;
         }
 
@@ -19,7 +19,7 @@ namespace Taco.Helpers.Utils {
             info.AddValue("_fault", Marshal.GetFunctionPointerForDelegate(_fault), typeof(IntPtr));
         }
 
-        private void Fire(Exception ex) {
+        void Fire(Exception ex) {
             _fault(ex);
         }
 
@@ -29,9 +29,7 @@ namespace Taco.Helpers.Utils {
                 if (thunk != null) return ex => ((FaultThunk)thunk).Fire(ex);
                 return null;
             }
-            set {
-                CallContext.SetData("taco.fault", new FaultThunk(value));
-            }
+            set { CallContext.SetData("taco.fault", new FaultThunk(value)); }
         }
 
         public static IDisposable Scope(Action<Exception> ex) {

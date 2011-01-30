@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,10 +9,8 @@ using Taco.Startup;
 using Environment = Taco.Startup.Environment;
 
 namespace AspNet.Taco {
-
     public class AspNetTacoModule : IHttpModule {
         void IHttpModule.Init(HttpApplication context) {
-
             var applicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
             var lines = File.ReadLines(Path.Combine(applicationBase, "config.taco"));
 
@@ -71,12 +68,10 @@ namespace AspNet.Taco {
         static IEnumerable<KeyValuePair<string, string>> Split(IEnumerable<KeyValuePair<string, string>> headers) {
             return headers.SelectMany(
                 kv => kv.Value
-                          .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                          .Select(v => new KeyValuePair<string, string>(kv.Key, v)));
+                    .Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(v => new KeyValuePair<string, string>(kv.Key, v)));
         }
 
-        void IHttpModule.Dispose() {
-        }
+        void IHttpModule.Dispose() {}
     }
 }
-

@@ -7,10 +7,9 @@ namespace Taco {
         IDictionary<string, object> /*env*/,
         Action<Exception> /*fault*/,
         Action<int, IDictionary<string, string>, IObservable<object>> /*result*/>;
-
     using LoggerAction = Action<
-        TraceEventType /*traceEventType*/, 
-        Func<string> /*message*/, 
+        TraceEventType /*traceEventType*/,
+        Func<string> /*message*/,
         Exception /*exception*/>;
 
 
@@ -18,6 +17,4 @@ namespace Taco {
     //public delegate void Fault(Exception exception);
     //public delegate void Result(int status, IDictionary<string, string> headers, IObservable<object> body);
     //public delegate void Log(TraceEventType traceEventType, Func<string> message, Exception exception);
-
 }
-

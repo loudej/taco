@@ -9,7 +9,6 @@ namespace Taco.Framework.Tests {
         IDictionary<string, object> /*env*/,
         Action<Exception> /*fault*/,
         Action<int, IDictionary<string, string>, IObservable<object>> /*result(status,headers,body)*/>;
-
     using FnResult = Action<int, IDictionary<string, string>, IObservable<object>>;
 
     [TestFixture]
@@ -33,7 +32,7 @@ namespace Taco.Framework.Tests {
             AssertLoadNames(loader, "TestName");
         }
 
-        private void AssertLoadNames(StubAssemblyLoader loader, params  string[] names) {
+        void AssertLoadNames(StubAssemblyLoader loader, params string[] names) {
             Assert.That(loader.LoadNames, Has.Count.EqualTo(names.Count()));
             foreach (var name in names) {
                 Assert.That(loader.LoadNames, Has.Some.EqualTo(name));
@@ -118,16 +117,16 @@ Run TestCascade
             return Singleton;
         }
 
-        private static void Call(IDictionary<string, object> env, Action<Exception> fault, FnResult result) {
+        static void Call(IDictionary<string, object> env, Action<Exception> fault, FnResult result) {
             env["TestApp"] = true;
             fault(null);
         }
     }
 
     public class TestMiddleware {
-        private readonly FnApp _app;
+        readonly FnApp _app;
 
-        private TestMiddleware(FnApp app) {
+        TestMiddleware(FnApp app) {
             _app = app;
         }
 
@@ -135,21 +134,19 @@ Run TestCascade
             return new TestMiddleware(app).Call;
         }
 
-        private void Call(IDictionary<string, object> env, Action<Exception> fault, FnResult result) {
+        void Call(IDictionary<string, object> env, Action<Exception> fault, FnResult result) {
             env["TestMiddleware"] = true;
             _app(env, fault, result);
         }
     }
 
     public class TestCascade {
-
         public static FnApp Create(IEnumerable<FnApp> apps) {
             return (env, fault, result) => {
                 env["TestCascade.Count"] = apps.Count();
                 result(0, null, null);
             };
         }
-
     }
 
     public class StubAssemblyLoader : IAssemblyLoader {

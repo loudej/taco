@@ -5,10 +5,10 @@ namespace Taco.Helpers {
     using LoggerAction = Action<TraceEventType /*traceEventType*/, Func<string> /*message*/, Exception /*exception*/>;
 
     public class Logger {
-        private readonly LoggerAction _writer;
-        private static readonly Logger NullLogger = new Logger((traceEventType, message, exception) => { });
+        readonly LoggerAction _writer;
+        static readonly Logger NullLogger = new Logger((traceEventType, message, exception) => { });
 
-        private Logger(LoggerAction writer) {
+        Logger(LoggerAction writer) {
             _writer = writer;
         }
 

@@ -27,9 +27,9 @@ namespace Taco.Helpers.Utils {
         }
 
         class Observer<T> : IObserver<T> {
-            private readonly Action<T> _next;
-            private readonly Action<Exception> _error;
-            private readonly Action _completed;
+            readonly Action<T> _next;
+            readonly Action<Exception> _error;
+            readonly Action _completed;
 
             public Observer(Action<T> next, Action<Exception> error, Action completed) {
                 _next = next;
@@ -37,9 +37,17 @@ namespace Taco.Helpers.Utils {
                 _completed = completed;
             }
 
-            public void OnNext(T value) { _next(value); }
-            public void OnError(Exception error) { _error(error); }
-            public void OnCompleted() { _completed(); }
+            public void OnNext(T value) {
+                _next(value);
+            }
+
+            public void OnError(Exception error) {
+                _error(error);
+            }
+
+            public void OnCompleted() {
+                _completed();
+            }
         }
     }
 }

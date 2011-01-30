@@ -15,7 +15,6 @@ namespace Taco.Helpers {
     public class ShowExceptions {
         public static FnApp Call(FnApp app) {
             return (env, fault, result) => {
-
                 Action<Exception, Action<object>> writeErrorPageBody = (ex, write) => {
                     write("<h1>Server Error</h1>");
                     write("<p>");
@@ -24,7 +23,7 @@ namespace Taco.Helpers {
                 };
 
                 Action<Exception> sendErrorPageResponse = ex => {
-                    var response = new Response(result) { Status = 500 };
+                    var response = new Response(result) {Status = 500};
                     response.SetHeader("Content-Type", "text/html");
                     response.Finish(() => writeErrorPageBody(ex, response.Write));
                 };

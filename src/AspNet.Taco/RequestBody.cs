@@ -3,7 +3,7 @@ using System.IO;
 
 namespace AspNet.Taco {
     class RequestBody : IObservable<object> {
-        private readonly Stream _stream;
+        readonly Stream _stream;
 
         public RequestBody(Stream stream) {
             _stream = stream;
@@ -13,8 +13,11 @@ namespace AspNet.Taco {
             public Action Go;
             public bool Stop;
             public readonly byte[] Buffer = new byte[4096];
-            public void Dispose() { Stop = true; }
-        };
+
+            public void Dispose() {
+                Stop = true;
+            }
+        } ;
 
         public IDisposable Subscribe(IObserver<object> observer) {
             var loop = new Loop();
