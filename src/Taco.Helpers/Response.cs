@@ -24,6 +24,16 @@ namespace Taco.Helpers {
             set { _status = value; }
         }
 
+        public string ContentType {
+            get { return GetHeader("Content-Type"); }
+            set { SetHeader("Content-Type", value); }
+        }
+
+        string GetHeader(string name) {
+            string value;
+            return _headers.TryGetValue(name, out value) ? value.Replace("\r\n", ",") : null;
+        }
+
         public void SetHeader(string name, string value) {
             _headers.Remove(name);
             AddHeader(name, value);

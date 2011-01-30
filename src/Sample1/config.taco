@@ -5,6 +5,6 @@ Load Sample1
 
 Use ShowExceptions
 
+Run RawApp
 //Run Wilson
-Run WilsonAsync
-//Run RawApp
+//Run WilsonAsync
