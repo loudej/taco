@@ -22,6 +22,8 @@ namespace AspNet.Taco {
             var builder = new Builder();
             builder.ParseLines(lines);
             var app = builder.ToApp();
+            
+            var standardError = Console.OpenStandardError(); //TODO: correct place for default output?
 
             context.AddOnBeginRequestAsync(
                 (sender, e, callback, state) => {
@@ -35,12 +37,12 @@ namespace AspNet.Taco {
 
                     var env = serverVariables.AllKeys
                         .ToDictionary(key => key, key => (object)serverVariables[key]);
-
+                    
                     new Environment(env) {
                         Version = new Version(1, 0),
                         UrlScheme = httpRequest.Url.Scheme,
                         Body = new RequestBody(httpRequest.InputStream),
-                        Errors = Console.OpenStandardError(),
+                        Errors = standardError,
                         Multithread = true,
                         Multiprocess = false,
                         RunOnce = false,
