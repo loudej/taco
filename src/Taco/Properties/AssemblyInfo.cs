@@ -1,4 +1,9 @@
-﻿using System.Reflection;
+﻿// Taco - sample code for consideration by Owin working group
+// Louis DeJardin
+// For purposes of illustration and exploration only.
+// Do not use for production system.
+// 
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 // Setting ComVisible to false makes the types in this assembly not visible 

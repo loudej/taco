@@ -83,6 +83,12 @@
     <XML>
       <FormatSettings />
     </XML>
+    <FileHeader><![CDATA[Taco - sample code for consideration by Owin working group
+Louis DeJardin
+For purposes of illustration and exploration only.
+Do not use for production system.
+
+]]></FileHeader>
     <GenerateMemberBody />
     <Naming2>
       <EventHandlerPatternLong>$object$_On$event$</EventHandlerPatternLong>
