@@ -34,26 +34,34 @@ namespace Sample2 {
                 else if (request.RequestMethod == "POST") {
                     // to the best of my knowledge this is the pre-c#5 form of await keyword
                     // not sure how error handling integrates
-                    request.ReadAllTaskAsync().Await(fault, stream => {
+                    request.ReadAllTaskAsync().Await(stream => {
+                        try {
+                            // the the rest of this is the same as the first example
+                            var response = new Response(result) {
+                                Status = 200,
+                                ContentType = "text/html"
+                            };
+                            response.Finish(() => {
+                                response.Write("<p>You posted ");
+                                response.Write(stream.Length);
+                                response.Write(" bytes of form data<p>");
 
-                        // the the rest of this is the same as the first example
-                        var response = new Response(result) {
-                            Status = 200,
-                            ContentType = "text/html"
-                        };
-                        response.Finish(() => {
-                            response.Write("<p>You posted ");
-                            response.Write(stream.Length);
-                            response.Write(" bytes of form data<p>");
-
-                            var form = ParamDictionary.Parse(Encoding.Default.GetString(stream.ToArray()));
-                            response.Write("<ul>");
-                            foreach (var kv in form) {
-                                response.Write("<li>").Write(kv.Key).Write(": ").Write(kv.Value).Write("</li>");
-                            }
-                            response.Write("</ul>");
-                        });
-                    });
+                                var form = ParamDictionary.Parse(Encoding.Default.GetString(stream.ToArray()));
+                                response.Write("<ul>");
+                                foreach (var kv in form) {
+                                    response.Write("<li>")
+                                        .Write(kv.Key)
+                                        .Write(": ")
+                                        .Write(kv.Value)
+                                        .Write("</li>");
+                                }
+                                response.Write("</ul>");
+                            });
+                        }
+                        catch (Exception ex) {
+                            fault(ex);
+                        }
+                    }, fault, () => {/* cancel is noop */ });
                 }
                 else {
                     new Response(result) { Status = 404 }.Finish();
@@ -77,18 +85,16 @@ namespace Sample2 {
             });
         }
 
-        public static Task Await<T>(this Task<T> task, Action<Exception> error, Action<T> continuation) {
+        public static Task Await<T>(this Task<T> task, Action<T> completed, Action<Exception> faulted, Action canceled) {
             return task.ContinueWith(t => {
                 if (t.IsCompleted) {
-                    try {
-                        continuation(t.Result);
-                    }
-                    catch (Exception ex) {
-                        error(ex);
-                    }
+                    completed(t.Result);
                 }
                 else if (t.IsFaulted) {
-                    error(t.Exception);
+                    faulted(t.Exception);
+                }
+                else if (t.IsCanceled) {
+                    canceled();
                 }
             }, TaskContinuationOptions.AttachedToParent | TaskContinuationOptions.ExecuteSynchronously);
         }
