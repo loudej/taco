@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Taco.Helpers.Utils {
-    class ParamDictionary : IDictionary<string, string> {
+    public class ParamDictionary : IDictionary<string, string> {
         public static IDictionary<string, string> Parse(string queryString) {
             // TODO: this is wrong in many, many ways
             var d = queryString.Split("&".ToCharArray())
@@ -22,7 +22,7 @@ namespace Taco.Helpers.Utils {
 
         readonly IDictionary<string, string> _impl;
 
-        public ParamDictionary(IDictionary<string, string> impl) {
+        ParamDictionary(IDictionary<string, string> impl) {
             _impl = impl;
         }
 

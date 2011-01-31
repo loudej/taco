@@ -48,8 +48,9 @@ namespace Taco.Helpers {
             _headers[name] = _headers.TryGetValue(name, out existing) ? existing + "\r\n" + sanitized : sanitized;
         }
 
-        public void Write(object data) {
+        public Response Write(object data) {
             _body.Write(data);
+            return this;
         }
 
 

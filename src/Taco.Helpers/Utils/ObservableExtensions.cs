@@ -6,7 +6,7 @@
 using System;
 
 namespace Taco.Helpers.Utils {
-    static class ObservableExtensions {
+    public static class ObservableExtensions {
         public static IObservable<T> Create<T>(Func<Action<T>, Action<Exception>, Action, IDisposable> subscribe) {
             return new Observable<T>(subscribe);
         }

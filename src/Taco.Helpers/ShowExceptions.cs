@@ -29,10 +29,10 @@ namespace Taco.Helpers {
 
                 Action<Exception> sendErrorPageResponse = ex => {
                     var response = new Response(result) { Status = 500, ContentType = "text/html" };
-                    writeErrorPageBody(ex, response.Write);
+                    writeErrorPageBody(ex, value=>response.Write(value));
                     response.Finish();
                 };
-
+                
                 try {
                     // intercept app-fault with sendErrorPageResponse, which is the full error page response
                     // intercept body-error with writeErrorPageBody, which adds the error text to the output and completes the response
