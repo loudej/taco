@@ -11,6 +11,8 @@ using Taco.Helpers.Utils;
 
 [assembly: Builder("BodyStreaming2", typeof(BodyStreaming2), "Create")]
 
+// This example uses Task<T> to marshal onto continuation delegates
+
 namespace Sample2 {
     using AppAction = Action<
         IDictionary<string, object>,
@@ -32,9 +34,8 @@ namespace Sample2 {
                     .Finish();
                 }
                 else if (request.RequestMethod == "POST") {
-                    // to the best of my knowledge this is the pre-c#5 form of await keyword
-                    // not sure how error handling integrates
-                    request.ReadAllTaskAsync().Await(stream => {
+
+                    request.ReadAllTaskAsync().ContinueWith(stream => {
                         try {
                             // the the rest of this is the same as the first example
                             var response = new Response(result) {
@@ -72,7 +73,7 @@ namespace Sample2 {
 
     public static class TaskExtensions {
         public static Task<MemoryStream> ReadAllTaskAsync(this Request request) {
-            // aggregate extension method is a convenient way to 
+            // Aggregate extension method is a convenient way to 
             // produce a Task<T> for a sequence consumption
 
             return request.Body.Aggregate(new MemoryStream(), (stream, data) => {
@@ -85,7 +86,7 @@ namespace Sample2 {
             });
         }
 
-        public static Task Await<T>(this Task<T> task, Action<T> completed, Action<Exception> faulted, Action canceled) {
+        public static Task ContinueWith<T>(this Task<T> task, Action<T> completed, Action<Exception> faulted, Action canceled) {
             return task.ContinueWith(t => {
                 if (t.IsCompleted) {
                     completed(t.Result);

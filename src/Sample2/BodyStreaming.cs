@@ -10,6 +10,8 @@ using Taco.Helpers.Utils;
 
 [assembly: Builder("BodyStreaming", typeof(BodyStreaming), "Create")]
 
+// This example accepts calls directly from the observable
+
 namespace Sample2 {
     using AppAction = Action<
         IDictionary<string, object>,
