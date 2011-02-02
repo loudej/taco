@@ -43,6 +43,7 @@
     <Compile Include="App.cs" />
     <Compile Include="BuilderAttribute.cs" />
     <Compile Include="Cargo.cs" />
+    <Compile Include="CargoExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
