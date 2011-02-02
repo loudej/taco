@@ -56,6 +56,10 @@
       <Project>{4CCB00EA-19D1-4D32-8951-65F8C9116D8B}</Project>
       <Name>Taco.Startup</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Taco\Taco.csproj">
+      <Project>{1E718D9D-094F-4069-815C-52D319EAADD9}</Project>
+      <Name>Taco</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

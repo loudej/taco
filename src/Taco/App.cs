@@ -11,12 +11,13 @@ namespace Taco {
     using AppAction = Action<
         IDictionary<string, object> /*env*/,
         Action<Exception> /*fault*/,
-        Action<int, IDictionary<string, string>, IObservable<object>> /*result*/>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>> /*result*/>;
     using LoggerAction = Action<
         TraceEventType /*traceEventType*/,
         Func<string> /*message*/,
         Exception /*exception*/>;
 
+    
 
     //public delegate void App<in TFault, in TResult>(IDictionary<string, object> env, TFault fault, TResult result);
     //public delegate void Fault(Exception exception);

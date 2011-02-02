@@ -13,6 +13,12 @@ using Taco.Helpers.Utils;
 // This example uses something like the await keyword
 
 namespace Sample2 {
+
+    using AppAction = Action<
+        IDictionary<string, object>,
+        Action<Exception>,
+        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+
     /// <summary>
     /// Approximate emulation of await keyword 
     /// </summary>
@@ -24,15 +30,16 @@ namespace Sample2 {
 
             return (awaitable, continuation) => {
                 var awaiter = getAwaiter(awaitable);
-                Action resumption = () => continuation(endAwait(awaiter));
-                if (!beginAwait(awaiter, resumption)) resumption();
+                if (beginAwait(awaiter, () => continuation(endAwait(awaiter))))
+                    return;
+                continuation(endAwait(awaiter));
             };
         }
     }
 
     public class BodyStreaming3 {
 
-        public static Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>> Create() {
+        public static AppAction Create() {
 
             // The expression t of an await-expression await t is called the task of the await expression. The task t is required to be awaitable, which means that all of the following must hold:
             // * (t).GetAwaiter() is a valid expression of type A. 
@@ -109,11 +116,11 @@ namespace Sample2 {
 
         public static bool BeginAwait(this Awaiter awaiter, Action resumption) {
             awaiter.Request.Body.ForEach(data => {
-                if (!(data is ArraySegment<byte>)) {
+                if (!(data.Result is ArraySegment<byte>)) {
                     throw new ApplicationException(
                         "Not actually handling data appropriately");
                 }
-                var segment = (ArraySegment<byte>)data;
+                var segment = (ArraySegment<byte>)data.Result;
                 ((Action<byte[], int, int>)awaiter.MemoryStream.Write)(segment.Array, segment.Offset,
                                                           segment.Count);
             }).Wait();

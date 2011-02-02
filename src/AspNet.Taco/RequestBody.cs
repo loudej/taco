@@ -5,9 +5,10 @@
 // 
 using System;
 using System.IO;
+using Taco;
 
 namespace AspNet.Taco {
-    class RequestBody : IObservable<object> {
+    class RequestBody : IObservable<Cargo<object>> {
         readonly Stream _stream;
 
         public RequestBody(Stream stream) {
@@ -24,7 +25,7 @@ namespace AspNet.Taco {
             }
         } ;
 
-        public IDisposable Subscribe(IObserver<object> observer) {
+        public IDisposable Subscribe(IObserver<Cargo<object>> observer) {
             var loop = new Loop();
             loop.Go = () => {
                 try {
@@ -38,8 +39,8 @@ namespace AspNet.Taco {
                                 observer.OnCompleted();
                             }
                             else {
-                                observer.OnNext(new ArraySegment<byte>(loop.Buffer, 0, count));
-                                loop.Go();
+                                if (!observer.OnNextAsync(new ArraySegment<byte>(loop.Buffer, 0, count), loop.Go))
+                                    loop.Go();
                             }
                         }
                         catch (Exception ex) {

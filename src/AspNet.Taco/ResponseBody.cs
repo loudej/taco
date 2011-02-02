@@ -5,30 +5,57 @@
 // 
 using System;
 using System.Text;
+using Taco;
 
 namespace AspNet.Taco {
     public class ResponseBody {
-        readonly Action<byte[], int, int> _write;
         readonly Encoding _encoding;
+        readonly Action<byte[], int, int> _write;
+        readonly Func<byte[], int, int, AsyncCallback, object, IAsyncResult> _beginWrite;
+        readonly Action<IAsyncResult> _endWrite;
 
-        public ResponseBody(Action<byte[], int, int> write, Encoding encoding) {
-            _write = write;
+        public ResponseBody(
+            Encoding encoding,
+            Action<byte[], int, int> write,
+            Func<byte[], int, int, AsyncCallback, object, IAsyncResult> beginWrite,
+            Action<IAsyncResult> endWrite) {
             _encoding = encoding;
+            _write = write;
+            _beginWrite = beginWrite;
+            _endWrite = endWrite;
         }
 
-        public void Write(object data) {
+
+        public void Write(Cargo<object> cargo) {
+            var data = Normalize(cargo.Result);
+            if (!cargo.Delayable) {
+                _write(data.Array, data.Offset, data.Count);
+                return;
+            }
+
+            var result = _beginWrite(data.Array, data.Offset, data.Count, asyncResult => {
+                if (asyncResult.CompletedSynchronously)
+                    return;
+                _endWrite(asyncResult);
+                cargo.Resume();
+            }, null);
+
+            if (result.CompletedSynchronously)
+                _endWrite(result);
+            else
+                cargo.Delay();
+        }
+
+        ArraySegment<byte> Normalize(object data) {
+            if (data is ArraySegment<byte>) {
+                return (ArraySegment<byte>)data;
+            }
+            
             if (data is byte[]) {
-                var buffer = (byte[])data;
-                _write(buffer, 0, buffer.Length);
+                return new ArraySegment<byte>((byte[])data);
             }
-            else if (data is ArraySegment<byte>) {
-                var segment = (ArraySegment<byte>)data;
-                _write(segment.Array, segment.Offset, segment.Count);
-            }
-            else {
-                var bytes = _encoding.GetBytes(Convert.ToString(data));
-                _write(bytes, 0, bytes.Length);
-            }
+
+            return new ArraySegment<byte>(_encoding.GetBytes(Convert.ToString(data)));
         }
     }
 }

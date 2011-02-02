@@ -9,21 +9,21 @@ using System.Linq;
 using System.Reflection;
 
 namespace Taco.Startup {
-    using FnApp = Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>;
+    using AppAction = Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
 
     public class Builder {
         readonly IAssemblyLoader _loader;
-        readonly Stack<Func<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>, Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>>> _middlewares = new Stack<Func<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>, Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>>>();
-        readonly List<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>> _apps = new List<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>>();
+        readonly Stack<Func<AppAction, AppAction>> _middlewares = new Stack<Func<AppAction, AppAction>>();
+        readonly List<AppAction> _apps = new List<AppAction>();
 
-        static readonly char[] EndOfLineCharacters = new[] {'\r', '\n'};
+        static readonly char[] EndOfLineCharacters = new[] { '\r', '\n' };
         readonly IDictionary<string, Action<string>> _directives;
 
         readonly IDictionary<string, IList<MethodInfo>> _componentFactories = new Dictionary<string, IList<MethodInfo>>();
 
 
         public Builder()
-            : this(new DefaultAssemblyLoader()) {}
+            : this(new DefaultAssemblyLoader()) { }
 
         public Builder(IAssemblyLoader loader) {
             _loader = loader;
@@ -34,12 +34,12 @@ namespace Taco.Startup {
             };
         }
 
-        public Builder Use(Func<Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>, Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>> middleware) {
+        public Builder Use(Func<AppAction,AppAction> middleware) {
             _middlewares.Push(middleware);
             return this;
         }
 
-        public Builder Run(Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>> app) {
+        public Builder Run(AppAction app) {
             var wrapped = app;
             while (_middlewares.Count != 0) {
                 var middleware = _middlewares.Pop();
@@ -49,7 +49,7 @@ namespace Taco.Startup {
             return this;
         }
 
-        public Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>> ToApp() {
+        public AppAction ToApp() {
             return _apps.Single();
         }
 
@@ -115,13 +115,13 @@ namespace Taco.Startup {
             var args = new List<object>();
 
             // provide all apps that have previously been pushed to a fnapp[] compatible argument
-            if (parameters.Any() && parameters.First().ParameterType.IsAssignableFrom(typeof(Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<object>>>[]))) {
+            if (parameters.Any() && parameters.First().ParameterType.IsAssignableFrom(typeof(AppAction[]))) {
                 args.Add(_apps.ToArray());
                 _apps.Clear();
             }
 
             var app = factories.Single().Invoke(null, args.ToArray());
-            var app2 = Coerce.CoerceDelegate<FnApp>(app);
+            var app2 = Coerce.CoerceDelegate<AppAction>(app);
             Run(app2);
         }
 
@@ -134,8 +134,8 @@ namespace Taco.Startup {
             Use(app => {
                 var methodInfo = factories.Single();
                 var neededDelegateType = methodInfo.GetParameters().Single().ParameterType;
-                var middleware = methodInfo.Invoke(null, new[] {Coerce.CoerceDelegate(neededDelegateType, app)});
-                return Coerce.CoerceDelegate<FnApp>(middleware);
+                var middleware = methodInfo.Invoke(null, new[] { Coerce.CoerceDelegate(neededDelegateType, app) });
+                return Coerce.CoerceDelegate<AppAction>(middleware);
             });
         }
     }

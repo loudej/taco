@@ -16,7 +16,7 @@ namespace Sample2 {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<object>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
 
     public class BodyStreaming {
         public static AppAction Create() {
@@ -38,10 +38,10 @@ namespace Sample2 {
                     request.Body.Subscribe(
                         data => {
                             // each data called
-                            if (!(data is ArraySegment<byte>)) {
+                            if (!(data.Result is ArraySegment<byte>)) {
                                 throw new ApplicationException("Not actually handling data appropriately");
                             }
-                            var segment = (ArraySegment<byte>)data;
+                            var segment = (ArraySegment<byte>)data.Result;
                             ((Action<byte[], int, int>)body.Write)(segment.Array, segment.Offset, segment.Count);
                         },
                         fault,

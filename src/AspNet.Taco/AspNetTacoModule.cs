@@ -58,7 +58,11 @@ namespace AspNet.Taco {
                                 foreach (var header in Split(headers)) {
                                     httpResponse.AppendHeader(header.Key, header.Value);
                                 }
-                                var writer = new ResponseBody(httpResponse.OutputStream.Write, httpResponse.ContentEncoding);
+                                var writer = new ResponseBody(
+                                    httpResponse.ContentEncoding, 
+                                    httpResponse.OutputStream.Write,
+                                    httpResponse.OutputStream.BeginWrite,
+                                    httpResponse.OutputStream.EndWrite);
                                 body.ForEach(writer.Write).Then(httpResponse.End);
                             });
                     }, state, TaskCreationOptions.PreferFairness);

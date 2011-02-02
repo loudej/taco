@@ -18,7 +18,7 @@ namespace Taco.Helpers {
     using FnApp = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<object>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
 
     public class Wilson {
         public static FnApp App() {

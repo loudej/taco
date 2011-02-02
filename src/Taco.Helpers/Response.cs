@@ -9,13 +9,13 @@ using Taco.Helpers.Utils;
 
 namespace Taco.Helpers {
     public class Response {
-        readonly Action<int, IDictionary<string, string>, IObservable<object>> _result;
+        readonly Action<int, IDictionary<string, string>, IObservable<Cargo<object>>> _result;
 
         int _status = 200;
         readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
         readonly Body _body = new Body();
 
-        public Response(Action<int, IDictionary<string, string>, IObservable<object>> result) {
+        public Response(Action<int, IDictionary<string, string>, IObservable<Cargo<object>>> result) {
             _result = result;
         }
 
@@ -80,7 +80,7 @@ namespace Taco.Helpers {
             _result(Status, _headers, _body.Attach(block));
         }
 
-        class Body : IObservable<object> {
+        class Body : IObservable<Cargo<object>> {
             readonly IList<object> _body = new List<object>();
             Func<Action<Exception>, Action, Action> _block;
 
@@ -90,16 +90,16 @@ namespace Taco.Helpers {
 
             public Action<object> Write;
 
-            public IObservable<object> Attach(Func<Action<Exception>, Action, Action> block) {
+            public IObservable<Cargo<object>> Attach(Func<Action<Exception>, Action, Action> block) {
                 _block = block;
                 return this;
             }
 
-            public IDisposable Subscribe(IObserver<object> observer) {
+            public IDisposable Subscribe(IObserver<Cargo<object>> observer) {
                 try {
-                    Write = observer.OnNext;
+                    Write = data => observer.OnNext(new Cargo<object>(data));
                     foreach (var piece in _body) {
-                        observer.OnNext(piece);
+                        observer.OnNext(new Cargo<object>(piece));
                     }
                     return new Disposable(_block(observer.OnError, observer.OnCompleted));
                 }

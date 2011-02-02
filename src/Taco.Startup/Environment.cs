@@ -36,8 +36,8 @@ namespace Taco.Startup {
             set { Set("taco.url_scheme", value); }
         }
 
-        public IObservable<object> Body {
-            get { return Get<IObservable<object>>("taco.input"); }
+        public IObservable<Cargo<object>> Body {
+            get { return Get<IObservable<Cargo<object>>>("taco.input"); }
             set { Set("taco.input", value); }
         }
 
