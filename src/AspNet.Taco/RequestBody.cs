@@ -16,32 +16,33 @@ namespace AspNet.Taco {
         }
 
         public IDisposable Subscribe(IObserver<Cargo<object>> observer) {
+            Action<Exception> error = observer.OnError;
             var buffer = new byte[4096];
-            return Loop.Run((halted, continuation) => {
-                try {
-                    _stream.BeginRead(buffer, 0, buffer.Length, ar => {
-                        try {
-                            var count = _stream.EndRead(ar);
-                            if (halted()) {
-                                return;
-                            }
-                            if (count == 0) {
-                                observer.OnCompleted();
-                            }
-                            else {
-                                if (!observer.OnNextAsync(new ArraySegment<byte>(buffer, 0, count), continuation))
-                                    continuation();
-                            }
-                        }
-                        catch (Exception ex) {
-                            observer.OnError(ex);
-                        }
-                    }, null);
-                }
-                catch (Exception ex) {
-                    observer.OnError(ex);
-                }
-            });
+            return Loop.Run((halted, continuation) => error.Guard(() =>
+                _stream.BeginRead(buffer, 0, buffer.Length, ar => error.Guard(() => {
+                    var count = _stream.EndRead(ar);
+                    if (halted()) {
+                        return;
+                    }
+                    if (count == 0) {
+                        observer.OnCompleted();
+                    }
+                    else {
+                        if (!observer.OnNextAsync(new ArraySegment<byte>(buffer, 0, count), continuation))
+                            continuation();
+                    }
+                }), null)));
+        }
+    }
+
+    static class ErrorExtensions {
+        public static void Guard(this Action<Exception> fault, Action action) {
+            try {
+                action();
+            }
+            catch (Exception ex) {
+                fault(ex);
+            }
         }
     }
 }

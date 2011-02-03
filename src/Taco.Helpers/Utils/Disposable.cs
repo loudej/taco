@@ -8,7 +8,6 @@ using System;
 namespace Taco.Helpers.Utils {
     public class Disposable : IDisposable {
         readonly Action _dispose;
-        public Disposable() : this(() => { }) {}
 
         public Disposable(Action dispose) {
             _dispose = dispose;
@@ -19,7 +18,7 @@ namespace Taco.Helpers.Utils {
         }
 
         public static IDisposable Noop {
-            get { return new Disposable(); }
+            get { return new Disposable(() => { }); }
         }
     }
 }

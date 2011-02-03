@@ -22,67 +22,64 @@ namespace Sample3 {
                 if (string.IsNullOrWhiteSpace(request.GET["Url"])) {
                     response.ContentType = "text/html";
                     response
-                       .Write("<form>")
-                       .Write("Url <input type='text' name='Url'/><br/>")
-                       .Write("Save as <input type='text' name='SaveAs' value='Data.txt'/><br/>")
-                       .Write("<input type='submit' value='Go'/>")
-                       .Write("</form>")
-                       .Finish();
+                        .Write("<form>")
+                        .Write("Url <input type='text' name='Url' style='width:50%;' value='http://download.microsoft.com/download/f/e/6/fe6eb291-e187-4b06-ad78-bb45d066c30f/6.0.6001.18000.367-KRMSDK_EN.iso'/><br/>")
+                        .Write("Save as <input type='text' name='SaveAs' style='width:50%;' value='6.0.6001.18000.367-KRMSDK_EN.iso'/><br/>")
+                        .Write("<input type='submit' value='Go'/>")
+                        .Write("</form>")
+                        .Finish();
                 }
                 else {
                     // make remote request asynchronously
                     var remoteRequest = WebRequest.Create(request.GET["Url"]);
 
-                    remoteRequest.BeginGetResponse(getResponseResult => {
-                        try {
-                            var remoteResponse = (HttpWebResponse)remoteRequest.EndGetResponse(getResponseResult);
+                    remoteRequest.BeginGetResponse(getResponseResult => fault.Guard(() => {
+                        var remoteResponse = (HttpWebResponse)remoteRequest.EndGetResponse(getResponseResult);
 
-                            // pass some response headers along
-                            response.Status = (int)remoteResponse.StatusCode;
-                            response.ContentType = remoteResponse.ContentType;
-                            if (!string.IsNullOrWhiteSpace(request.GET["SaveAs"])) {
-                                response.AddHeader("Content-Disposition", "attachment; filename=" + request.GET["SaveAs"]);
-                            }
+                        // pass some response headers along
+                        response.Status = (int)remoteResponse.StatusCode;
+                        response.ContentType = remoteResponse.ContentType;
+                        if (!string.IsNullOrWhiteSpace(request.GET["SaveAs"])) {
+                            response.AddHeader("Content-Disposition", "attachment; filename=" + request.GET["SaveAs"]);
+                        }
 
-                            // pass response body along
-                            var remoteStream = remoteResponse.GetResponseStream();
-                            if (remoteStream == null) {
-                                response.Finish();
-                            }
-                            else {
-                                response.Finish((next, error, complete) => {
-                                    var buffer = new byte[4096];
-                                    return Loop.Run((halted, continuation) => {
-                                        try {
-                                            remoteStream.BeginRead(buffer, 0, buffer.Length, streamResult => {
-                                                try {
-                                                    var count = remoteStream.EndRead(streamResult);
-                                                    if (count <= 0) {
-                                                        complete();
-                                                        return;
-                                                    }
-                                                    if (!next.InvokeAsync(new ArraySegment<byte>(buffer, 0, count), continuation)) {
-                                                        continuation();
-                                                    }
-                                                }
-                                                catch (Exception ex) {
-                                                    error(ex);
-                                                }
-                                            }, null);
-                                        }
-                                        catch (Exception ex) {
-                                            error(ex);
-                                        }
-                                    });
-                                });
-                            }
+                        // pass response body along
+                        var remoteStream = remoteResponse.GetResponseStream();
+                        if (remoteStream == null) {
+                            response.Finish();
                         }
-                        catch (Exception ex) {
-                            fault(ex);
+                        else {
+                            var buffer = new byte[4096];
+                            response.Finish((next, error, complete) =>
+                                Loop.Run((halted, continuation) => error.Guard(() =>
+                                    remoteStream.BeginRead(buffer, 0, buffer.Length, streamResult => error.Guard(() => {
+                                        var count = remoteStream.EndRead(streamResult);
+                                        if (halted()) {
+                                            return;
+                                        }
+                                        if (count <= 0) {
+                                            complete();
+                                            return;
+                                        }
+                                        if (!next.InvokeAsync(new ArraySegment<byte>(buffer, 0, count), continuation)) {
+                                            continuation();
+                                        }
+                                    }), null))));
                         }
-                    }, null);
+                    }), null);
                 }
             };
+        }
+    }
+
+    static class ErrorExtensions {
+        public static void Guard(this Action<Exception> fault, Action action) {
+            try {
+                action();
+            }
+            catch (Exception ex) {
+                fault(ex);
+            }
         }
     }
 }
