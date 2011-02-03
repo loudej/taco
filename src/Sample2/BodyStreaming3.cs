@@ -1,4 +1,9 @@
-﻿using System;
+﻿// Taco - sample code for consideration by Owin working group
+// Louis DeJardin
+// For purposes of illustration and exploration only.
+// Do not use for production system.
+// 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -13,7 +18,6 @@ using Taco.Helpers.Utils;
 // This example uses something like the await keyword
 
 namespace Sample2 {
-
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
@@ -27,7 +31,6 @@ namespace Sample2 {
             Func<T1, T2> getAwaiter,
             Func<T2, Action, bool> beginAwait,
             Func<T2, T3> endAwait) {
-
             return (awaitable, continuation) => {
                 var awaiter = getAwaiter(awaitable);
                 if (beginAwait(awaiter, () => continuation(endAwait(awaiter))))
@@ -38,9 +41,7 @@ namespace Sample2 {
     }
 
     public class BodyStreaming3 {
-
         public static AppAction Create() {
-
             // The expression t of an await-expression await t is called the task of the await expression. The task t is required to be awaitable, which means that all of the following must hold:
             // * (t).GetAwaiter() is a valid expression of type A. 
             // * Given an expression a of type A and an expression r of type System.Action, (a).BeginAwait(r) is a valid boolean-expression. 
@@ -56,7 +57,7 @@ namespace Sample2 {
                 var request = new Request(env);
 
                 if (request.RequestMethod == "GET") {
-                    new Response(result) { Status = 200, ContentType = "text/html" }
+                    new Response(result) {Status = 200, ContentType = "text/html"}
                         .Write(@"
 <form method='post'>
     <input type='text' name='hello'/>
@@ -98,7 +99,7 @@ namespace Sample2 {
                     });
                 }
                 else {
-                    new Response(result) { Status = 404 }.Finish();
+                    new Response(result) {Status = 404}.Finish();
                 }
             };
         }
@@ -111,7 +112,7 @@ namespace Sample2 {
     /// </summary>
     public static class RequestExtensions {
         public static Awaiter GetAwaiter(this Request request) {
-            return new Awaiter { Request = request, MemoryStream = new MemoryStream() };
+            return new Awaiter {Request = request, MemoryStream = new MemoryStream()};
         }
 
         public static bool BeginAwait(this Awaiter awaiter, Action resumption) {
@@ -122,7 +123,7 @@ namespace Sample2 {
                 }
                 var segment = (ArraySegment<byte>)data.Result;
                 ((Action<byte[], int, int>)awaiter.MemoryStream.Write)(segment.Array, segment.Offset,
-                                                          segment.Count);
+                    segment.Count);
             }).Wait();
             return false;
         }

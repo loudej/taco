@@ -1,24 +1,40 @@
-﻿using System;
+﻿// Taco - sample code for consideration by Owin working group
+// Louis DeJardin
+// For purposes of illustration and exploration only.
+// Do not use for production system.
+// 
+using System;
 
 namespace Taco {
-
     public class Cargo {
         readonly Delivery _delivery;
-        
-        protected Cargo() {
-        }
+
+        protected Cargo() {}
 
         protected Cargo(Delivery delivery) {
             _delivery = delivery;
         }
+
         protected Cargo(Cargo cargo) {
             _delivery = cargo._delivery;
         }
 
-        public bool Delayable { get { return _delivery != null; } }
-        public bool Delayed { get { return _delivery != null && _delivery.Delayed; } }
-        public void Delay() { _delivery.Delayed = true; }
-        public void Resume() { _delivery.Delayed = true; _delivery.Continuation(); }
+        public bool Delayable {
+            get { return _delivery != null; }
+        }
+
+        public bool Delayed {
+            get { return _delivery != null && _delivery.Delayed; }
+        }
+
+        public void Delay() {
+            _delivery.Delayed = true;
+        }
+
+        public void Resume() {
+            _delivery.Delayed = true;
+            _delivery.Continuation();
+        }
 
         protected class Delivery {
             public Delivery(Action continuation) {
@@ -51,7 +67,9 @@ namespace Taco {
         //    return new Cargo<T>(result);
         //}
 
-        public T Result { get { return _result; } }
+        public T Result {
+            get { return _result; }
+        }
 
         public Cargo<T2> Alter<T2>(T2 result) {
             return new Cargo<T2>(result, this);

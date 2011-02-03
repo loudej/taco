@@ -1,4 +1,9 @@
-﻿using System;
+﻿// Taco - sample code for consideration by Owin working group
+// Louis DeJardin
+// For purposes of illustration and exploration only.
+// Do not use for production system.
+// 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -25,16 +30,15 @@ namespace Sample2 {
                 var request = new Request(env);
 
                 if (request.RequestMethod == "GET") {
-                    new Response(result) { Status = 200, ContentType = "text/html" }
-                    .Write(@"
+                    new Response(result) {Status = 200, ContentType = "text/html"}
+                        .Write(@"
 <form method='post'>
     <input type='text' name='hello'/>
     <input type='submit' name='ok' value='ok'/>
 </form>")
-                    .Finish();
+                        .Finish();
                 }
                 else if (request.RequestMethod == "POST") {
-
                     request.ReadAllTaskAsync().ContinueWith(stream => {
                         try {
                             // the the rest of this is the same as the first example
@@ -62,10 +66,12 @@ namespace Sample2 {
                         catch (Exception ex) {
                             fault(ex);
                         }
-                    }, fault, () => {/* cancel is noop */ });
+                    }, fault, () => {
+/* cancel is noop */
+                    });
                 }
                 else {
-                    new Response(result) { Status = 404 }.Finish();
+                    new Response(result) {Status = 404}.Finish();
                 }
             };
         }

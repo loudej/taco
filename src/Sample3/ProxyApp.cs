@@ -1,10 +1,14 @@
-﻿using System;
+﻿// Taco - sample code for consideration by Owin working group
+// Louis DeJardin
+// For purposes of illustration and exploration only.
+// Do not use for production system.
+// 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using Sample3;
 using Taco;
 using Taco.Helpers;
-using Taco.Helpers.Utils;
 
 [assembly: Builder("Proxy", typeof(ProxyApp), "App")]
 

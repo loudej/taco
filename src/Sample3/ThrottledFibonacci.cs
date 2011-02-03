@@ -1,23 +1,23 @@
-﻿using System;
+﻿// Taco - sample code for consideration by Owin working group
+// Louis DeJardin
+// For purposes of illustration and exploration only.
+// Do not use for production system.
+// 
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using Sample3;
 using Taco;
 using Taco.Helpers.Utils;
 
 [assembly: Builder("ThrottledFibonacci", typeof(ThrottledFibonacci), "App")]
-namespace Sample3 {
 
+namespace Sample3 {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
         Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
 
     public class ThrottledFibonacci {
-
-
-
         public static AppAction App() {
             return (env, fault, result) => {
                 var body = ObservableExtensions.Create<Cargo<object>>((next, error, complete) => {
@@ -38,7 +38,7 @@ namespace Sample3 {
                         }
                     });
                 });
-                result(200, new Dictionary<string, string> { { "Content-Type", "text/html" } }, body);
+                result(200, new Dictionary<string, string> {{"Content-Type", "text/html"}}, body);
             };
         }
     }

@@ -50,7 +50,7 @@ namespace AspNet.Taco {
             if (data is ArraySegment<byte>) {
                 return (ArraySegment<byte>)data;
             }
-            
+
             if (data is byte[]) {
                 return new ArraySegment<byte>((byte[])data);
             }

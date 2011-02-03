@@ -31,14 +31,13 @@ namespace Sample1 {
                 response.Write("<p>This part is being added to the response helper's buffer. The result callback has not been invoked yet.</p>");
 
                 response.Finish(() => {
-
                     response.Write("<p>The result callback has been invoked. This part is going out live, but you can no longer change http response status or headers.</p>");
 
                     response.Write("<p>request.PathInfo=");
                     response.Write(request.PathInfo);
                     response.Write("</p>");
 
-                    response.Write(new byte[] { 65, 66, 67, 68 });
+                    response.Write(new byte[] {65, 66, 67, 68});
 
                     response.Write("<p>And now for something completely different.");
                     throw new ApplicationException("Something completely different");

@@ -28,7 +28,7 @@ namespace Taco.Helpers {
                 };
 
                 Action<Exception> sendErrorPageResponse = ex => {
-                    var response = new Response(result) { Status = 500, ContentType = "text/html" };
+                    var response = new Response(result) {Status = 500, ContentType = "text/html"};
                     writeErrorPageBody(ex, value => response.Write(value));
                     response.Finish();
                 };

@@ -1,4 +1,9 @@
-﻿using System;
+﻿// Taco - sample code for consideration by Owin working group
+// Louis DeJardin
+// For purposes of illustration and exploration only.
+// Do not use for production system.
+// 
+using System;
 
 namespace Taco {
     public static class CargoExtensions {
@@ -7,6 +12,7 @@ namespace Taco {
             action(cargo);
             return cargo.Delayed;
         }
+
         public static void InvokeSync<T>(this Action<Cargo<T>> action, T result) {
             action(new Cargo<T>(result));
         }

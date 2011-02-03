@@ -16,14 +16,14 @@ namespace Taco.Startup {
         readonly Stack<Func<AppAction, AppAction>> _middlewares = new Stack<Func<AppAction, AppAction>>();
         readonly List<AppAction> _apps = new List<AppAction>();
 
-        static readonly char[] EndOfLineCharacters = new[] { '\r', '\n' };
+        static readonly char[] EndOfLineCharacters = new[] {'\r', '\n'};
         readonly IDictionary<string, Action<string>> _directives;
 
         readonly IDictionary<string, IList<MethodInfo>> _componentFactories = new Dictionary<string, IList<MethodInfo>>();
 
 
         public Builder()
-            : this(new DefaultAssemblyLoader()) { }
+            : this(new DefaultAssemblyLoader()) {}
 
         public Builder(IAssemblyLoader loader) {
             _loader = loader;
@@ -34,7 +34,7 @@ namespace Taco.Startup {
             };
         }
 
-        public Builder Use(Func<AppAction,AppAction> middleware) {
+        public Builder Use(Func<AppAction, AppAction> middleware) {
             _middlewares.Push(middleware);
             return this;
         }
@@ -134,7 +134,7 @@ namespace Taco.Startup {
             Use(app => {
                 var methodInfo = factories.Single();
                 var neededDelegateType = methodInfo.GetParameters().Single().ParameterType;
-                var middleware = methodInfo.Invoke(null, new[] { Coerce.CoerceDelegate(neededDelegateType, app) });
+                var middleware = methodInfo.Invoke(null, new[] {Coerce.CoerceDelegate(neededDelegateType, app)});
                 return Coerce.CoerceDelegate<AppAction>(middleware);
             });
         }
