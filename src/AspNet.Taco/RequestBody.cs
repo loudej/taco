@@ -15,32 +15,22 @@ namespace AspNet.Taco {
             _stream = stream;
         }
 
-        class Loop : IDisposable {
-            public Action Go;
-            public bool Stop;
-            public readonly byte[] Buffer = new byte[4096];
-
-            public void Dispose() {
-                Stop = true;
-            }
-        } ;
-
         public IDisposable Subscribe(IObserver<Cargo<object>> observer) {
-            var loop = new Loop();
-            loop.Go = () => {
+            var buffer = new byte[4096];
+            return Loop.Run((halted, continuation) => {
                 try {
-                    _stream.BeginRead(loop.Buffer, 0, loop.Buffer.Length, ar => {
+                    _stream.BeginRead(buffer, 0, buffer.Length, ar => {
                         try {
                             var count = _stream.EndRead(ar);
-                            if (loop.Stop) {
+                            if (halted()) {
                                 return;
                             }
                             if (count == 0) {
                                 observer.OnCompleted();
                             }
                             else {
-                                if (!observer.OnNextAsync(new ArraySegment<byte>(loop.Buffer, 0, count), loop.Go))
-                                    loop.Go();
+                                if (!observer.OnNextAsync(new ArraySegment<byte>(buffer, 0, count), continuation))
+                                    continuation();
                             }
                         }
                         catch (Exception ex) {
@@ -51,10 +41,7 @@ namespace AspNet.Taco {
                 catch (Exception ex) {
                     observer.OnError(ex);
                 }
-            };
-
-            loop.Go();
-            return loop;
+            });
         }
     }
 }

@@ -41,7 +41,7 @@ namespace AspNet.Taco {
                     new Environment(env) {
                         Version = new Version(1, 0),
                         UrlScheme = httpRequest.Url.Scheme,
-                        Body = new RequestBody(httpRequest.InputStream),
+                        Body = new RequestBody(httpRequest.GetBufferlessInputStream()),
                         Errors = standardError,
                         Multithread = true,
                         Multiprocess = false,

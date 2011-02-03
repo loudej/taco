@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AspNetTacoModule.cs" />
+    <Compile Include="Loop.cs" />
     <Compile Include="RequestBody.cs" />
     <Compile Include="ResponseBody.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,5 +1,11 @@
 ﻿
 
+Load Taco.Helpers
 Load Sample3
 
-Run ThrottledFibonacci
+Use ShowExceptions
+
+//Run ThrottledFibonacci
+//Run Echo
+Run Proxy
+

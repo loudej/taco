@@ -80,9 +80,17 @@ namespace Taco.Helpers {
             _result(Status, _headers, _body.Attach(block));
         }
 
+        public void Finish(IObservable<Cargo<object>> body) {
+            _result(Status, _headers, _body.Attach(body.Subscribe));
+        }
+
+        public void Finish(Func<Action<Cargo<object>>, Action<Exception>, Action, IDisposable> subscribe) {
+            _result(Status, _headers, _body.Attach(subscribe));
+        }
+
         class Body : IObservable<Cargo<object>> {
             readonly IList<object> _body = new List<object>();
-            Func<Action<Exception>, Action, Action> _block;
+            Func<Action<Cargo<object>>, Action<Exception>, Action, IDisposable> _subscribe;
 
             public Body() {
                 Write = _body.Add;
@@ -90,8 +98,13 @@ namespace Taco.Helpers {
 
             public Action<object> Write;
 
+
             public IObservable<Cargo<object>> Attach(Func<Action<Exception>, Action, Action> block) {
-                _block = block;
+                return Attach((next, fault, complete) => new Disposable(block(fault, complete)));
+            }
+
+            public IObservable<Cargo<object>> Attach(Func<Action<Cargo<object>>, Action<Exception>, Action, IDisposable> subscribe) {
+                _subscribe = subscribe;
                 return this;
             }
 
@@ -101,7 +114,7 @@ namespace Taco.Helpers {
                     foreach (var piece in _body) {
                         observer.OnNext(new Cargo<object>(piece));
                     }
-                    return new Disposable(_block(observer.OnError, observer.OnCompleted));
+                    return _subscribe(observer.OnNext, observer.OnError, observer.OnCompleted);
                 }
                 catch (Exception ex) {
                     observer.OnError(ex);
