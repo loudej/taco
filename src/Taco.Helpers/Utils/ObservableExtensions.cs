@@ -19,6 +19,14 @@ namespace Taco.Helpers.Utils {
             return new Observable<T>((next, fault, done) => filter((next2, fault2, done2) => source.Subscribe(new Observer<T>(next2, fault2, done2)), next, fault, done));
         }
 
+        public static IObservable<T> Filter<T>(this IObservable<T> source, Func<T, T> filter) {
+            return source.Filter((subscribe, next, fault, done) => subscribe(data => next(filter(data)), fault, done));
+        }
+
+        public static IObservable<Cargo<T>> Filter<T>(this IObservable<Cargo<T>> source, Func<T, T> filter) {
+            return source.Filter((subscribe, next, fault, done) => subscribe(data => next(data.Alter(filter(data.Result))), fault, done));
+        }
+
         class Observable<T> : IObservable<T> {
             readonly Func<Action<T>, Action<Exception>, Action, IDisposable> _subscribe;
 
