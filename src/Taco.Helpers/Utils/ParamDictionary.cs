@@ -3,6 +3,7 @@
 // For purposes of illustration and exploration only.
 // Do not use for production system.
 // 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,8 @@ namespace Taco.Helpers.Utils {
             var d = queryString.Split("&".ToCharArray())
                 .Select(item => item.Split("=".ToCharArray(), 2))
                 .Where(item => item.Length == 2)
-                .GroupBy(item => item[0], item => Decode(item[1]))
-                .ToDictionary(g => g.Key, g => string.Join(",", g.ToArray()));
+                .GroupBy(item => item[0], item => Decode(item[1]), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => string.Join(",", g.ToArray()), StringComparer.OrdinalIgnoreCase);
 
             return new ParamDictionary(d);
         }
