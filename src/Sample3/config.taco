@@ -4,6 +4,7 @@ Load Taco.Helpers
 Load Sample3
 
 Use ShowExceptions
+Use Uppercase
 
 //Run ThrottledFibonacci
 //Run Echo

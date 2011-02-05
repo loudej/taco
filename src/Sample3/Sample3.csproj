@@ -59,6 +59,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SampleFilteringMiddleware.cs" />
     <Compile Include="ProxyApp2.cs" />
     <Compile Include="Loop.cs" />
     <Compile Include="ProxyApp.cs" />
