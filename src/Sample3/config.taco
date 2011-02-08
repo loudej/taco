@@ -3,9 +3,11 @@
 Load Taco.Helpers
 Load Sample3
 
+Use Deflate
 Use ShowExceptions
 Use Uppercase
 
+//Run Wilson
 //Run ThrottledFibonacci
 //Run Echo
 //Run Proxy
