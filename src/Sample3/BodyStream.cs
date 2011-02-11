@@ -34,15 +34,16 @@ namespace Sample3 {
 
         public override void Write(byte[] buffer, int offset, int count) {
             var data = new ArraySegment<byte>(buffer, offset, count);
-            _next.InvokeSync(data);
+            var cargo = new Cargo<object>(data);
+            _next(cargo);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
-            var result = new Result(callback,state);
-
+            var result = new Result(callback, state);
             var data = new ArraySegment<byte>(buffer, offset, count);
-            var delayed = _next.InvokeAsync(data, () => result.Complete(true));
-            if (!delayed) {
+            var cargo = new Cargo<object>(data, () => result.Complete(true));
+            _next(cargo);
+            if (!cargo.Delayed) {
                 result.Complete(false);
             }
             return result;
@@ -56,13 +57,12 @@ namespace Sample3 {
         class Result : IAsyncResult {
             private readonly AsyncCallback _callback;
 
-            public Result(AsyncCallback callback, object asyncState)
-            {
+            public Result(AsyncCallback callback, object asyncState) {
                 _callback = callback;
                 AsyncState = asyncState;
                 AsyncWaitHandle = new ManualResetEvent(false);
             }
-            
+
             public object AsyncState { get; private set; }
             public bool IsCompleted { get; private set; }
             public bool CompletedSynchronously { get; private set; }
