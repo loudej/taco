@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Threading;
 using Taco;
 
-namespace Sample3
-{
+namespace Sample3 {
     class BodyStream : Stream {
         private readonly Action<Cargo<object>> _next;
         private readonly Action<Exception> _error;
@@ -39,17 +38,43 @@ namespace Sample3
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
+            var result = new Result(callback,state);
+
             var data = new ArraySegment<byte>(buffer, offset, count);
-            var tcs = new TaskCompletionSource<object>(state);
-            if (callback != null)
-                tcs.Task.ContinueWith(t => callback(t), TaskContinuationOptions.ExecuteSynchronously);
-            if (!_next.InvokeAsync(data, () => tcs.SetResult(null)))
-                tcs.SetResult(null);
-            return tcs.Task;
+            var delayed = _next.InvokeAsync(data, () => result.Complete(true));
+            if (!delayed) {
+                result.Complete(false);
+            }
+            return result;
         }
 
         public override void EndWrite(IAsyncResult asyncResult) {
-            ((Task)asyncResult).Wait();
+            if (!asyncResult.IsCompleted)
+                asyncResult.AsyncWaitHandle.WaitOne();
+        }
+
+        class Result : IAsyncResult {
+            private readonly AsyncCallback _callback;
+
+            public Result(AsyncCallback callback, object asyncState)
+            {
+                _callback = callback;
+                AsyncState = asyncState;
+                AsyncWaitHandle = new ManualResetEvent(false);
+            }
+            
+            public object AsyncState { get; private set; }
+            public bool IsCompleted { get; private set; }
+            public bool CompletedSynchronously { get; private set; }
+            public WaitHandle AsyncWaitHandle { get; private set; }
+
+            public void Complete(bool delayed) {
+                CompletedSynchronously = !delayed;
+                IsCompleted = true;
+                ((ManualResetEvent)AsyncWaitHandle).Set();
+                if (_callback != null)
+                    _callback(this);
+            }
         }
 
         public override void Close() {
