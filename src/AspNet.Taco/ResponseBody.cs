@@ -26,14 +26,13 @@ namespace AspNet.Taco {
         }
 
 
-        public void Write(Cargo<object> cargo) {
-            var data = Normalize(cargo.Result);
+        public void Write(Cargo<ArraySegment<byte>> cargo) {
             if (!cargo.Delayable) {
-                _write(data.Array, data.Offset, data.Count);
+                _write(cargo.Result.Array, cargo.Result.Offset, cargo.Result.Count);
                 return;
             }
 
-            var result = _beginWrite(data.Array, data.Offset, data.Count, asyncResult => {
+            var result = _beginWrite(cargo.Result.Array, cargo.Result.Offset, cargo.Result.Count, asyncResult => {
                 if (asyncResult.CompletedSynchronously)
                     return;
                 _endWrite(asyncResult);
@@ -44,18 +43,6 @@ namespace AspNet.Taco {
                 _endWrite(result);
             else
                 cargo.Delay();
-        }
-
-        ArraySegment<byte> Normalize(object data) {
-            if (data is ArraySegment<byte>) {
-                return (ArraySegment<byte>)data;
-            }
-
-            if (data is byte[]) {
-                return new ArraySegment<byte>((byte[])data);
-            }
-
-            return new ArraySegment<byte>(_encoding.GetBytes(Convert.ToString(data)));
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Taco {
     using AppAction = Action<
         IDictionary<string, object> /*env*/,
         Action<Exception> /*fault*/,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>> /*result*/>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>> /*result*/>;
     using LoggerAction = Action<
         TraceEventType /*traceEventType*/,
         Func<string> /*message*/,

@@ -27,8 +27,8 @@ namespace Taco.Helpers {
             _env[name] = value;
         }
 
-        public IObservable<Cargo<object>> Body {
-            get { return Get<IObservable<Cargo<object>>>("taco.input"); }
+        public IObservable<Cargo<ArraySegment<byte>>> Body {
+            get { return Get<IObservable<Cargo<ArraySegment<byte>>>>("taco.input"); }
         }
 
         public string ScriptName {

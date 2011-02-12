@@ -22,7 +22,7 @@ namespace Sample2 {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     public class BodyStreaming2 {
         public static AppAction Create() {
@@ -30,7 +30,7 @@ namespace Sample2 {
                 var request = new Request(env);
 
                 if (request.RequestMethod == "GET") {
-                    new Response(result) {Status = 200, ContentType = "text/html"}
+                    new Response(result) { Status = 200, ContentType = "text/html" }
                         .Write(@"
 <form method='post'>
     <input type='text' name='hello'/>
@@ -67,11 +67,11 @@ namespace Sample2 {
                             fault(ex);
                         }
                     }, fault, () => {
-/* cancel is noop */
+                        /* cancel is noop */
                     });
                 }
                 else {
-                    new Response(result) {Status = 404}.Finish();
+                    new Response(result) { Status = 404 }.Finish();
                 }
             };
         }
@@ -83,11 +83,7 @@ namespace Sample2 {
             // produce a Task<T> for a sequence consumption
 
             return request.Body.Aggregate(new MemoryStream(), (stream, data) => {
-                if (!(data.Result is ArraySegment<byte>)) {
-                    throw new ApplicationException("Not actually handling data appropriately");
-                }
-                var segment = (ArraySegment<byte>)data.Result;
-                ((Action<byte[], int, int>)stream.Write)(segment.Array, segment.Offset, segment.Count);
+                stream.Write(data.Result.Array, data.Result.Offset, data.Result.Count);
                 return stream;
             });
         }

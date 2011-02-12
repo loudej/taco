@@ -9,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 
 namespace Taco.Startup {
-    using AppAction = Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+    using AppAction = Action<IDictionary<string, object>, Action<Exception>, Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     public class Builder {
         readonly IAssemblyLoader _loader;
