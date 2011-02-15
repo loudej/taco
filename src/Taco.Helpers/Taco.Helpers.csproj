@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cascade.cs" />
     <Compile Include="Utils\ObservableExtensions.cs" />
     <Compile Include="Utils\Disposable.cs" />
     <Compile Include="Utils\FaultThunk.cs" />
