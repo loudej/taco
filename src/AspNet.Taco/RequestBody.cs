@@ -8,14 +8,14 @@ using System.IO;
 using Taco;
 
 namespace AspNet.Taco {
-    class RequestBody : IObservable<Cargo<object>> {
+    class RequestBody : IObservable<Cargo<ArraySegment<byte>>> {
         readonly Stream _stream;
 
         public RequestBody(Stream stream) {
             _stream = stream;
         }
 
-        public IDisposable Subscribe(IObserver<Cargo<object>> observer) {
+        public IDisposable Subscribe(IObserver<Cargo<ArraySegment<byte>>> observer) {
             Action<Exception> error = observer.OnError;
             var buffer = new byte[4096];
             return Loop.Run((halted, continuation) => error.Guard(() =>

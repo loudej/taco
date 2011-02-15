@@ -16,7 +16,7 @@ namespace Sample3 {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     public class ProxyApp {
         public static AppAction App() {

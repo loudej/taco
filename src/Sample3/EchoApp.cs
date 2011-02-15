@@ -15,7 +15,7 @@ namespace Sample3 {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     public class EchoApp {
         public static AppAction App() {
@@ -43,25 +43,25 @@ namespace Sample3 {
             };
         }
 
-        class EchoObservable : IObservable<Cargo<object>> {
-            readonly IObservable<Cargo<object>> _requestObservable;
+        class EchoObservable : IObservable<Cargo<ArraySegment<byte>>> {
+            readonly IObservable<Cargo<ArraySegment<byte>>> _requestObservable;
 
-            public EchoObservable(IObservable<Cargo<object>> requestObservable) {
+            public EchoObservable(IObservable<Cargo<ArraySegment<byte>>> requestObservable) {
                 _requestObservable = requestObservable;
             }
 
-            public IDisposable Subscribe(IObserver<Cargo<object>> responseObserver) {
+            public IDisposable Subscribe(IObserver<Cargo<ArraySegment<byte>>> responseObserver) {
                 return _requestObservable.Subscribe(new EchoObserver(responseObserver));
             }
 
-            class EchoObserver : IObserver<Cargo<object>> {
-                readonly IObserver<Cargo<object>> _responseObserver;
+            class EchoObserver : IObserver<Cargo<ArraySegment<byte>>> {
+                readonly IObserver<Cargo<ArraySegment<byte>>> _responseObserver;
 
-                public EchoObserver(IObserver<Cargo<object>> responseObserver) {
+                public EchoObserver(IObserver<Cargo<ArraySegment<byte>>> responseObserver) {
                     _responseObserver = responseObserver;
                 }
 
-                public void OnNext(Cargo<object> value) {
+                public void OnNext(Cargo<ArraySegment<byte>> value) {
                     _responseObserver.OnNext(value);
                 }
 

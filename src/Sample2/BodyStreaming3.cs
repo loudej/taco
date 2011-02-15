@@ -21,7 +21,7 @@ namespace Sample2 {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     /// <summary>
     /// Approximate emulation of await keyword 
@@ -57,7 +57,7 @@ namespace Sample2 {
                 var request = new Request(env);
 
                 if (request.RequestMethod == "GET") {
-                    new Response(result) {Status = 200, ContentType = "text/html"}
+                    new Response(result) { Status = 200, ContentType = "text/html" }
                         .Write(@"
 <form method='post'>
     <input type='text' name='hello'/>
@@ -99,7 +99,7 @@ namespace Sample2 {
                     });
                 }
                 else {
-                    new Response(result) {Status = 404}.Finish();
+                    new Response(result) { Status = 404 }.Finish();
                 }
             };
         }
@@ -112,19 +112,14 @@ namespace Sample2 {
     /// </summary>
     public static class RequestExtensions {
         public static Awaiter GetAwaiter(this Request request) {
-            return new Awaiter {Request = request, MemoryStream = new MemoryStream()};
+            return new Awaiter { Request = request, MemoryStream = new MemoryStream() };
         }
 
         public static bool BeginAwait(this Awaiter awaiter, Action resumption) {
-            awaiter.Request.Body.ForEach(data => {
-                if (!(data.Result is ArraySegment<byte>)) {
-                    throw new ApplicationException(
-                        "Not actually handling data appropriately");
-                }
-                var segment = (ArraySegment<byte>)data.Result;
-                ((Action<byte[], int, int>)awaiter.MemoryStream.Write)(segment.Array, segment.Offset,
-                    segment.Count);
-            }).Wait();
+            var write = (Action<byte[], int, int>)awaiter.MemoryStream.Write;
+            awaiter.Request.Body
+                .ForEach(data => write(data.Result.Array, data.Result.Offset, data.Result.Count))
+                .Wait();
             return false;
         }
 

@@ -15,7 +15,7 @@ namespace Sample3 {
     using AppAction = Action<
     IDictionary<string, object>,
     Action<Exception>,
-    Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+    Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     public class SampleFilteringMiddleware {
 
@@ -23,30 +23,18 @@ namespace Sample3 {
             return (env, fault, result) =>
                 app(env, fault, (status, headers, body) => {
                     if (headers.ContainsKey("Content-Type") && headers["Content-Type"].StartsWith("text/"))
-                        result(status, headers, body.Filter(data => ToUpper(data)));
+                        result(status, headers, body.Filter(ToUpper));
                     else
                         result(status, headers, body);
                 });
         }
 
-        static object ToUpper(object result) {
-            if (result is string)
-                return ((string)result).ToUpperInvariant();
-
-            if (result is ArraySegment<byte>)
-                return ToUpper((ArraySegment<byte>)result);
-
-            if (result is byte[])
-                return ToUpper(new ArraySegment<byte>((byte[])result, 0, ((byte[])result).Length));
-
-            return result;
-        }
-
-        static byte[] ToUpper(ArraySegment<byte> input) {
-            return Enumerable.Range(0, input.Count)
-                .Select(index => input.Array[input.Offset + index])
+        static ArraySegment<byte> ToUpper(ArraySegment<byte> input) {
+            return new ArraySegment<byte>(input.Array
+                .Skip(input.Offset)
+                .Take(input.Count)
                 .Select(b => (b >= 'a' && b <= 'z') ? (byte)(b + 'A' - 'a') : b)
-                .ToArray();
+                .ToArray());
         }
 
 
@@ -79,15 +67,13 @@ namespace Sample3 {
             return false;
         }
 
-        private static void Write(Cargo<object> cargo, Stream stream) {
-            var data = Normalize(cargo.Result);
-
+        private static void Write(Cargo<ArraySegment<byte>> cargo, Stream stream) {
             if (!cargo.Delayable) {
-                stream.Write(data.Array, data.Offset, data.Count);
+                stream.Write(cargo.Result.Array, cargo.Result.Offset, cargo.Result.Count);
                 return;
             }
 
-            var result = stream.BeginWrite(data.Array, data.Offset, data.Count, asyncResult => {
+            var result = stream.BeginWrite(cargo.Result.Array, cargo.Result.Offset, cargo.Result.Count, asyncResult => {
                 if (asyncResult.CompletedSynchronously)
                     return;
                 stream.EndWrite(asyncResult);
@@ -100,14 +86,5 @@ namespace Sample3 {
                 cargo.Delay();
         }
 
-        private static ArraySegment<byte> Normalize(object data) {
-            if (data is ArraySegment<byte>)
-                return (ArraySegment<byte>)data;
-            if (data is byte[])
-                return new ArraySegment<byte>((byte[])data);
-
-            //todo: have response encoding in environment?
-            return new ArraySegment<byte>(Encoding.Default.GetBytes(Convert.ToString(data)));
-        }
     }
 }

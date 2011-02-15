@@ -5,11 +5,11 @@ using Taco;
 
 namespace Sample3 {
     class BodyStream : Stream {
-        private readonly Action<Cargo<object>> _next;
+        private readonly Action<Cargo<ArraySegment<byte>>> _next;
         private readonly Action<Exception> _error;
         private readonly Action _complete;
 
-        public BodyStream(Action<Cargo<object>> next, Action<Exception> error, Action complete) {
+        public BodyStream(Action<Cargo<ArraySegment<byte>>> next, Action<Exception> error, Action complete) {
             _next = next;
             _error = error;
             _complete = complete;
@@ -34,14 +34,14 @@ namespace Sample3 {
 
         public override void Write(byte[] buffer, int offset, int count) {
             var data = new ArraySegment<byte>(buffer, offset, count);
-            var cargo = new Cargo<object>(data);
+            var cargo = Cargo.From(data);
             _next(cargo);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) {
             var result = new Result(callback, state);
             var data = new ArraySegment<byte>(buffer, offset, count);
-            var cargo = new Cargo<object>(data, () => result.Complete(true));
+            var cargo = Cargo.From(data, () => result.Complete(true));
             _next(cargo);
             if (!cargo.Delayed) {
                 result.Complete(false);

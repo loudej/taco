@@ -17,7 +17,7 @@ namespace Sample3 {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     /// <summary>
     /// This is nearly the same as ProxyApp, but the single method is unrolled 
@@ -77,14 +77,14 @@ namespace Sample3 {
             }
         }
 
-        class ProxyBody : IObservable<Cargo<object>> {
+        class ProxyBody : IObservable<Cargo<ArraySegment<byte>>> {
             readonly Stream _remoteStream;
 
             public ProxyBody(Stream remoteStream) {
                 _remoteStream = remoteStream;
             }
 
-            public IDisposable Subscribe(IObserver<Cargo<object>> observer) {
+            public IDisposable Subscribe(IObserver<Cargo<ArraySegment<byte>>> observer) {
                 var pump = new Pump(_remoteStream, observer);
                 pump.StartRead();
                 return pump;
@@ -92,11 +92,11 @@ namespace Sample3 {
 
             class Pump : IDisposable {
                 readonly Stream _remoteStream;
-                readonly IObserver<Cargo<object>> _observer;
+                readonly IObserver<Cargo<ArraySegment<byte>>> _observer;
                 readonly byte[] _buffer;
                 bool _halted;
 
-                public Pump(Stream remoteStream, IObserver<Cargo<object>> observer) {
+                public Pump(Stream remoteStream, IObserver<Cargo<ArraySegment<byte>>> observer) {
                     _buffer = new byte[4096];
                     _remoteStream = remoteStream;
                     _observer = observer;
@@ -136,7 +136,7 @@ namespace Sample3 {
                 void StartNext(ArraySegment<byte> segment) {
                     try {
                         if (_halted) return;
-                        var cargo = new Cargo<object>(segment, NextCallback);
+                        var cargo = Cargo.From(segment, NextCallback);
                         _observer.OnNext(cargo);
                         if (!cargo.Delayed)
                             NextCallback();

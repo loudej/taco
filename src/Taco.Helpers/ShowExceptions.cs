@@ -5,6 +5,7 @@
 // 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Taco;
 using Taco.Helpers;
 using Taco.Helpers.Utils;
@@ -15,16 +16,22 @@ namespace Taco.Helpers {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
+    
+    static class EncodingExtensions {
+        public static ArraySegment<byte> ToBytes(this string text) {
+            return new ArraySegment<byte>(Encoding.Default.GetBytes(text));
+        }
+    }
     public class ShowExceptions {
         public static AppAction Call(AppAction app) {
             return (env, fault, result) => {
-                Action<Exception, Action<object>> writeErrorPageBody = (ex, write) => {
-                    write("<h1>Server Error</h1>");
-                    write("<p>");
-                    write(ex.Message); //TODO: htmlencode, etc
-                    write("</p>");
+                Action<Exception, Action<ArraySegment<byte>>> writeErrorPageBody = (ex, write) => {
+                    write("<h1>Server Error</h1>".ToBytes());
+                    write("<p>".ToBytes());
+                    write(ex.Message.ToBytes()); //TODO: htmlencode, etc
+                    write("</p>".ToBytes());
                 };
 
                 Action<Exception> sendErrorPageResponse = ex => {

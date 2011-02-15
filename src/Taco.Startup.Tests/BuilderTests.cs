@@ -13,8 +13,8 @@ namespace Taco.Framework.Tests {
     using FnApp = Action<
         IDictionary<string, object> /*env*/,
         Action<Exception> /*fault*/,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>> /*result(status,headers,body)*/>;
-    using FnResult = Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>> /*result(status,headers,body)*/>;
+    using FnResult = Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>;
 
     [TestFixture]
     public class BuilderTests {

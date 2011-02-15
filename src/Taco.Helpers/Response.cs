@@ -5,17 +5,18 @@
 // 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Taco.Helpers.Utils;
 
 namespace Taco.Helpers {
     public class Response {
-        readonly Action<int, IDictionary<string, string>, IObservable<Cargo<object>>> _result;
+        readonly Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>> _result;
 
         int _status = 200;
         readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
         readonly Body _body = new Body();
 
-        public Response(Action<int, IDictionary<string, string>, IObservable<Cargo<object>>> result) {
+        public Response(Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>> result) {
             _result = result;
         }
 
@@ -80,17 +81,17 @@ namespace Taco.Helpers {
             _result(Status, _headers, _body.Attach(block));
         }
 
-        public void Finish(IObservable<Cargo<object>> body) {
+        public void Finish(IObservable<Cargo<ArraySegment<byte>>> body) {
             _result(Status, _headers, _body.Attach(body.Subscribe));
         }
 
-        public void Finish(Func<Action<Cargo<object>>, Action<Exception>, Action, IDisposable> subscribe) {
+        public void Finish(Func<Action<Cargo<ArraySegment<byte>>>, Action<Exception>, Action, IDisposable> subscribe) {
             _result(Status, _headers, _body.Attach(subscribe));
         }
 
-        class Body : IObservable<Cargo<object>> {
+        class Body : IObservable<Cargo<ArraySegment<byte>>> {
             readonly IList<object> _body = new List<object>();
-            Func<Action<Cargo<object>>, Action<Exception>, Action, IDisposable> _subscribe;
+            Func<Action<Cargo<ArraySegment<byte>>>, Action<Exception>, Action, IDisposable> _subscribe;
 
             public Body() {
                 Write = _body.Add;
@@ -99,20 +100,20 @@ namespace Taco.Helpers {
             public Action<object> Write;
 
 
-            public IObservable<Cargo<object>> Attach(Func<Action<Exception>, Action, Action> block) {
+            public IObservable<Cargo<ArraySegment<byte>>> Attach(Func<Action<Exception>, Action, Action> block) {
                 return Attach((next, fault, complete) => new Disposable(block(fault, complete)));
             }
 
-            public IObservable<Cargo<object>> Attach(Func<Action<Cargo<object>>, Action<Exception>, Action, IDisposable> subscribe) {
+            public IObservable<Cargo<ArraySegment<byte>>> Attach(Func<Action<Cargo<ArraySegment<byte>>>, Action<Exception>, Action, IDisposable> subscribe) {
                 _subscribe = subscribe;
                 return this;
             }
 
-            public IDisposable Subscribe(IObserver<Cargo<object>> observer) {
+            public IDisposable Subscribe(IObserver<Cargo<ArraySegment<byte>>> observer) {
                 try {
-                    Write = data => observer.OnNext(new Cargo<object>(data));
+                    Write = data => observer.OnNext(Cargo.From(Normalize(data)));
                     foreach (var piece in _body) {
-                        observer.OnNext(new Cargo<object>(piece));
+                        observer.OnNext(Cargo.From(Normalize(piece)));
                     }
                     return _subscribe(observer.OnNext, observer.OnError, observer.OnCompleted);
                 }
@@ -120,6 +121,16 @@ namespace Taco.Helpers {
                     observer.OnError(ex);
                     return Disposable.Noop;
                 }
+            }
+
+            ArraySegment<byte> Normalize(object data) {
+                if (data is ArraySegment<byte>)
+                    return (ArraySegment<byte>)data;
+                if (data is byte[])
+                    return new ArraySegment<byte>((byte[])data);
+
+                //todo: have response encoding in environment?
+                return new ArraySegment<byte>(Encoding.Default.GetBytes(Convert.ToString(data)));
             }
         }
     }

@@ -9,7 +9,7 @@ namespace Taco {
     public class Cargo {
         readonly Delivery _delivery;
 
-        protected Cargo() {}
+        protected Cargo() { }
 
         protected Cargo(Delivery delivery) {
             _delivery = delivery;
@@ -17,6 +17,14 @@ namespace Taco {
 
         protected Cargo(Cargo cargo) {
             _delivery = cargo._delivery;
+        }
+
+        public static Cargo<T> From<T>(T result) {
+            return new Cargo<T>(result);
+        }
+
+        public static Cargo<T> From<T>(T result, Action continuation) {
+            return new Cargo<T>(result, continuation);
         }
 
         public bool Delayable {
