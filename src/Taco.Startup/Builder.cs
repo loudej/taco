@@ -16,14 +16,14 @@ namespace Taco.Startup {
         readonly Stack<Func<AppAction, AppAction>> _middlewares = new Stack<Func<AppAction, AppAction>>();
         readonly List<AppAction> _apps = new List<AppAction>();
 
-        static readonly char[] EndOfLineCharacters = new[] {'\r', '\n'};
+        static readonly char[] EndOfLineCharacters = new[] { '\r', '\n' };
         readonly IDictionary<string, Action<string>> _directives;
 
         readonly IDictionary<string, IList<MethodInfo>> _componentFactories = new Dictionary<string, IList<MethodInfo>>();
 
 
         public Builder()
-            : this(new DefaultAssemblyLoader()) {}
+            : this(new DefaultAssemblyLoader()) { }
 
         public Builder(IAssemblyLoader loader) {
             _loader = loader;
@@ -126,15 +126,23 @@ namespace Taco.Startup {
         }
 
         void DoUse(string text) {
+            var parts = text.Split(" ".ToCharArray(), 2, StringSplitOptions.RemoveEmptyEntries);
+
+            var componentName = parts[0];
             IList<MethodInfo> factories;
-            if (!_componentFactories.TryGetValue(text, out factories)) {
-                throw new ApplicationException("No factory methods registered for component: " + text);
+            if (!_componentFactories.TryGetValue(componentName, out factories)) {
+                throw new ApplicationException("No factory methods registered for component: " + componentName);
             }
 
             Use(app => {
                 var methodInfo = factories.Single();
-                var neededDelegateType = methodInfo.GetParameters().Single().ParameterType;
-                var middleware = methodInfo.Invoke(null, new[] {Coerce.CoerceDelegate(neededDelegateType, app)});
+                var neededDelegateType = methodInfo.GetParameters().First().ParameterType;
+                
+                var args = new List<object>();
+                args.Add(Coerce.CoerceDelegate(neededDelegateType, app));
+                args.AddRange(parts.Skip(1));
+
+                var middleware = methodInfo.Invoke(null, args.ToArray());
                 return Coerce.CoerceDelegate<AppAction>(middleware);
             });
         }

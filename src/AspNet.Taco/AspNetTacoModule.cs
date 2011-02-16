@@ -50,6 +50,16 @@ namespace AspNet.Taco {
                         Logger = (eventType, message, exception) => { }, //TODO: any default logger for this host?
                     };
 
+                    var scriptName = httpRequest.ApplicationPath;
+                    if (scriptName == "/")
+                        scriptName = "";
+                    var pathInfo = httpRequest.Url.AbsolutePath;
+                    if (pathInfo == "")
+                        pathInfo = "/";
+
+                    env["SCRIPT_NAME"] = scriptName;
+                    env["PATH_INFO"] = pathInfo.Substring(scriptName.Length);
+
 
                     var task = Task.Factory.StartNew(_ => {
                         app.InvokeAsync(env)
@@ -79,10 +89,10 @@ namespace AspNet.Taco {
         static IEnumerable<KeyValuePair<string, string>> Split(IEnumerable<KeyValuePair<string, string>> headers) {
             return headers.SelectMany(
                 kv => kv.Value
-                    .Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries)
+                    .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(v => new KeyValuePair<string, string>(kv.Key, v)));
         }
 
-        void IHttpModule.Dispose() {}
+        void IHttpModule.Dispose() { }
     }
 }

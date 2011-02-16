@@ -3,8 +3,35 @@
 Load Taco.Helpers
 Load Sample1
 
-Use ShowExceptions
+// Run all of the apps
+
+Use Path /Wilson
+Run Wilson
+
+Use Path /WilsonAsync
+Run WilsonAsync
 
 Run RawApp
-//Run Wilson
-//Run WilsonAsync
+
+
+// and finally the trunk middleware pipeline, and the
+// Cascade which takes the above Run items as an array
+
+Use ShowExceptions
+Run Cascade
+
+
+
+// the above was easier to implement.
+// but ideally the other Use/Run array would be indented after Cascade, like the following
+
+//Use ShowExceptions
+//Run Cascade
+//    Use Path Wilson/
+//    Run Wilson
+//
+//    Use Path WilsonAsync/
+//    Run WilsonAsync
+//
+//    Run RawApp
+

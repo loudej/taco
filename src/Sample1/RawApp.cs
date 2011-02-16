@@ -33,9 +33,10 @@ namespace Sample1 {
                 response.Finish(() => {
                     response.Write("<p>The result callback has been invoked. This part is going out live, but you can no longer change http response status or headers.</p>");
 
-                    response.Write("<p>request.PathInfo=");
-                    response.Write(request.PathInfo);
-                    response.Write("</p>");
+                    response.Write("<p>request.PathInfo=").Write(request.PathInfo).Write("</p>");
+                    response.Write("<p>request.ScriptName=").Write(request.ScriptName).Write("</p>");
+
+                    response.Write("<p> see also <a href='wilson'>Wilson</a> and <a href='wilsonasync'>WilsonAsync</a></p>");
 
                     response.Write(new byte[] {65, 66, 67, 68});
 

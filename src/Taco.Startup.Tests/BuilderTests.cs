@@ -113,6 +113,21 @@ Run TestCascade
             Assert.That(env.ContainsKey("TestMiddleware"), Is.False, "the use are attached to the apps, not the cascade");
             Assert.That(env["TestCascade.Count"], Is.EqualTo(2));
         }
+        [Test]
+        public void Use_with_more_text_provides_extra_argument() {
+            var loader = new StubAssemblyLoader();
+            var builder = new Builder(loader);
+            builder.Parse(@"
+Load TestName
+Use TestWithData Foo
+Run TestApp
+");
+            var app = builder.ToApp();
+            IDictionary<string, object> env = new Dictionary<string, object>();
+            app(env, ex => { }, (a, b, c) => { });
+            Assert.That(env.ContainsKey("TestWithData"), Is.True);
+            Assert.That(env["TestWithData.Data"], Is.EqualTo("Foo"));
+        }
     }
 
     public class TestApp {
@@ -145,6 +160,26 @@ Run TestCascade
         }
     }
 
+    public class TestWithData {
+        readonly FnApp _app;
+        private readonly string _data;
+
+        TestWithData(FnApp app, string data)
+        {
+            _app = app;
+            _data = data;
+        }
+
+        public static FnApp Create(FnApp app, string data) {
+            return new TestWithData(app, data).Call;
+        }
+
+        void Call(IDictionary<string, object> env, Action<Exception> fault, FnResult result) {
+            env["TestWithData"] = true;
+            env["TestWithData.Data"] = _data;
+            _app(env, fault, result);
+        }
+    }
     public class TestCascade {
         public static FnApp Create(IEnumerable<FnApp> apps) {
             return (env, fault, result) => {
@@ -162,6 +197,7 @@ Run TestCascade
             yield return new BuilderAttribute("TestApp", typeof(TestApp), "Create");
             yield return new BuilderAttribute("TestMiddleware", typeof(TestMiddleware), "Create");
             yield return new BuilderAttribute("TestCascade", typeof(TestCascade), "Create");
+            yield return new BuilderAttribute("TestWithData", typeof(TestWithData), "Create");
         }
     }
 }

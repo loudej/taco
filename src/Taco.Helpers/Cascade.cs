@@ -5,12 +5,13 @@ using Taco;
 using Taco.Helpers;
 
 [assembly: Builder("Cascade", typeof(Cascade), "Create")]
+[assembly: Builder("Cascade", typeof(Cascade), "Create")]
 
 namespace Taco.Helpers {
     using AppAction = Action<
         IDictionary<string, object>,
         Action<Exception>,
-        Action<int, IDictionary<string, string>, IObservable<Cargo<object>>>>;
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     public class Cascade {
 
