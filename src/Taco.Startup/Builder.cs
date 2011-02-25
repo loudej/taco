@@ -1,7 +1,19 @@
-﻿// Taco - sample code for consideration by Owin working group
-// Louis DeJardin
-// For purposes of illustration and exploration only.
-// Do not use for production system.
+﻿// Licensed to .NET HTTP Abstractions (the "Project") under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The Project licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//  
+//   http://www.apache.org/licenses/LICENSE-2.0
+//  
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 // 
 using System;
 using System.Collections.Generic;
@@ -16,14 +28,14 @@ namespace Taco.Startup {
         readonly Stack<Func<AppAction, AppAction>> _middlewares = new Stack<Func<AppAction, AppAction>>();
         readonly List<AppAction> _apps = new List<AppAction>();
 
-        static readonly char[] EndOfLineCharacters = new[] { '\r', '\n' };
+        static readonly char[] EndOfLineCharacters = new[] {'\r', '\n'};
         readonly IDictionary<string, Action<string>> _directives;
 
         readonly IDictionary<string, IList<MethodInfo>> _componentFactories = new Dictionary<string, IList<MethodInfo>>();
 
 
         public Builder()
-            : this(new DefaultAssemblyLoader()) { }
+            : this(new DefaultAssemblyLoader()) {}
 
         public Builder(IAssemblyLoader loader) {
             _loader = loader;
@@ -137,7 +149,7 @@ namespace Taco.Startup {
             Use(app => {
                 var methodInfo = factories.Single();
                 var neededDelegateType = methodInfo.GetParameters().First().ParameterType;
-                
+
                 var args = new List<object>();
                 args.Add(Coerce.CoerceDelegate(neededDelegateType, app));
                 args.AddRange(parts.Skip(1));

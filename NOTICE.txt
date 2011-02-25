@@ -1,4 +1,6 @@
-Taco - sample code for consideration by Owin working group
-Louis DeJardin
-For purposes of illustration and exploration only.
-Do not use for production system.
+TACO - Taco Ain't Considered OWIN (http://github.com/loudej/taco)
+Copyright 2011 .NET HTTP Abstractions
+
+This product includes software developed at
+.NET HTTP Abstractions (http://groups.google.com/group/net-http-abstractions).
+

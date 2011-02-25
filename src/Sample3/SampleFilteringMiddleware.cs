@@ -1,9 +1,25 @@
-﻿using System;
+﻿// Licensed to .NET HTTP Abstractions (the "Project") under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The Project licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//  
+//   http://www.apache.org/licenses/LICENSE-2.0
+//  
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+// 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using Sample3;
 using Taco;
 using Taco.Helpers.Utils;
@@ -13,12 +29,11 @@ using Taco.Helpers.Utils;
 
 namespace Sample3 {
     using AppAction = Action<
-    IDictionary<string, object>,
-    Action<Exception>,
-    Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
+        IDictionary<string, object>,
+        Action<Exception>,
+        Action<int, IDictionary<string, string>, IObservable<Cargo<ArraySegment<byte>>>>>;
 
     public class SampleFilteringMiddleware {
-
         public static AppAction Uppercase(AppAction app) {
             return (env, fault, result) =>
                 app(env, fault, (status, headers, body) => {
@@ -36,7 +51,6 @@ namespace Sample3 {
                 .Select(b => (b >= 'a' && b <= 'z') ? (byte)(b + 'A' - 'a') : b)
                 .ToArray());
         }
-
 
 
         public static AppAction Deflate(AppAction app) {
@@ -58,7 +72,7 @@ namespace Sample3 {
             };
         }
 
-        private static bool HasAcceptEncodingDeflate(IDictionary<string, object> env) {
+        static bool HasAcceptEncodingDeflate(IDictionary<string, object> env) {
             object acceptEncoding;
             if (env.TryGetValue("HTTP_ACCEPT_ENCODING", out acceptEncoding) &&
                 Convert.ToString(acceptEncoding).Split(',').Contains("deflate")) {
@@ -67,7 +81,7 @@ namespace Sample3 {
             return false;
         }
 
-        private static void Write(Cargo<ArraySegment<byte>> cargo, Stream stream) {
+        static void Write(Cargo<ArraySegment<byte>> cargo, Stream stream) {
             if (!cargo.Delayable) {
                 stream.Write(cargo.Result.Array, cargo.Result.Offset, cargo.Result.Count);
                 return;
@@ -85,6 +99,5 @@ namespace Sample3 {
             else
                 cargo.Delay();
         }
-
     }
 }
